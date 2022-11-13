@@ -5,26 +5,7 @@ use std::process::Command;
 
 use thiserror::Error;
 
-#[cfg(target_os = "freebsd")]
-pub(crate) fn valgrind_without_aslr(_arch: &str) -> Command {
-    let mut cmd = Command::new("proccontrol");
-    cmd.arg("-m").arg("aslr").arg("-s").arg("disable");
-    cmd
-}
-
-#[cfg(target_os = "linux")]
-pub(crate) fn valgrind_without_aslr(arch: &str) -> Command {
-    let mut cmd = Command::new("setarch");
-    cmd.arg(arch).arg("-R").arg("valgrind");
-    cmd
-}
-
-#[cfg(not(any(target_os = "freebsd", target_os = "linux")))]
-pub(crate) fn valgrind_without_aslr(_: &str) -> Command {
-    Command::new("valgrind")
-}
-
-const CALLIPER_RUN_ID: &str = "CALLIPER_RUN_ID";
+pub(super) const CALLIPER_RUN_ID: &str = "CALLIPER_RUN_ID";
 
 #[derive(Debug, Error)]
 pub enum RunIdError {
@@ -42,4 +23,12 @@ pub(crate) fn get_run_id() -> Result<usize, RunIdError> {
 
 pub fn is_setup_run() -> bool {
     get_run_id().is_err()
+}
+
+pub fn black_box<T>(dummy: T) -> T {
+    unsafe {
+        let ret = std::ptr::read_volatile(&dummy);
+        std::mem::forget(dummy);
+        ret
+    }
 }

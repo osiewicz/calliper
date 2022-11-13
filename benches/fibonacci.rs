@@ -1,4 +1,5 @@
-use calliper::{BenchmarkBuilder, BenchmarkRun};
+use calliper::{BenchmarkSettings, BenchmarkRun, run};
+use calliper::utils::black_box;
 
 #[inline(never)]
 #[no_mangle]
@@ -23,17 +24,17 @@ fn fibonacci_quick(n: u64) -> u64 {
     current
 }
 
-fn run() {
-    let n = 5;
-    fibonacci_quick(n);
+fn run_bench() {
+    black_box(fibonacci_quick(black_box(5)));
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut builder = BenchmarkBuilder::default();
+    let mut builder = BenchmarkSettings::default();
     builder.l1_cache_size = 32768;
     builder.functions.push(BenchmarkRun {
-        func: run,
-        filters: vec!["fibonacci_quick".into()],
+        func: run_bench,
+        filters: vec![],
     });
-    Ok(builder.run()?)
+    run(&builder)?;
+    Ok(())
 }
