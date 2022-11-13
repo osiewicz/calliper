@@ -25,7 +25,11 @@ fn fibonacci_quick(n: u64) -> u64 {
 }
 
 fn run_bench() {
-    black_box(fibonacci_quick(black_box(5)));
+    black_box(fibonacci_slow(black_box(20)));
+}
+
+fn run_slow_bench() {
+    black_box(fibonacci_quick(black_box(20)));
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -33,8 +37,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     builder.l1_cache_size = 32768;
     builder.functions.push(BenchmarkRun {
         func: run_bench,
-        filters: vec![],
+        filters: vec!["*fibonacci_quick*".into()],
     });
-    run(&builder)?;
+    builder.functions.push(BenchmarkRun {
+        func: run_slow_bench,
+        filters: vec!["*fibonacci_slow*".into()],
+    });
+    run(&builder).unwrap();
     Ok(())
 }

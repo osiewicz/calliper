@@ -7,7 +7,6 @@ pub struct ParsedCallgrindOutput;
 fn prepare_command(settings: &BenchmarkSettings) -> Command {
     let mut command = Command::new(&settings.valgrind_path);
     command.arg("--tool=callgrind");
-    command.arg("--instr-atstart=no");
     command.arg("--collect-atstart=no");
     command.arg("--cache-sim=yes");
     command
