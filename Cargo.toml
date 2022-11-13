@@ -1,0 +1,20 @@
+[package]
+name = "calliper"
+authors = ["Piotr Osiewicz <peterosiewicz@gmail.com>"]
+version = "0.1.0"
+edition = "2021"
+
+description = "Fine-grained benchmarking made easy."
+readme = "README.md"
+keywords = ["benchmark", "calliper", "callgrind"]
+categories = ["development-tools::profiling"]
+license = "Apache-2.0/MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "~1.0"
+
+[[bench]]
+name = "fibonacci"
+harness = false
