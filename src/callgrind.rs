@@ -4,11 +4,19 @@ use std::process::{Command, Stdio};
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
 pub struct ParsedCallgrindOutput;
 
+fn format_bool(value: bool) -> &'static str {
+    if value {
+        "yes"
+    } else {
+        "no"
+    }
+}
+
 fn prepare_command(settings: &BenchmarkSettings) -> Command {
     let mut command = Command::new(&settings.valgrind_path);
     command.arg("--tool=callgrind");
-    command.arg("--collect-atstart=no");
-    command.arg("--cache-sim=yes");
+    command.arg(&format!("--collect-atstart={}", format_bool(settings.collect_atstart)));
+    command.arg(&format!("--cache-sim={}", format_bool(settings.cache_sim)));
     command
 }
 pub(crate) fn spawn_callgrind_instances(settings: &BenchmarkSettings) {
@@ -19,7 +27,6 @@ pub(crate) fn spawn_callgrind_instances(settings: &BenchmarkSettings) {
         }
 
         command.arg(std::env::current_exe().unwrap());
-        println!("{:?}", command);
         command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
         command.spawn().unwrap().wait().unwrap();
     }

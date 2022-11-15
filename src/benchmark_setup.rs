@@ -15,6 +15,7 @@ pub struct BenchmarkSettings {
     pub cleanup_files: bool,
     pub parallelism_level: u64,
     pub collect_bus: bool,
+    pub collect_atstart: bool,
 }
 
 impl Default for BenchmarkSettings {
@@ -30,6 +31,7 @@ impl Default for BenchmarkSettings {
             cleanup_files: true,
             parallelism_level: 1,
             collect_bus: false,
+            collect_atstart: false,
         }
     }
 }
