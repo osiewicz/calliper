@@ -13,9 +13,16 @@ fn format_bool(value: bool) -> &'static str {
 }
 
 fn prepare_command(settings: &BenchmarkSettings) -> Command {
-    let mut command = Command::new(&settings.valgrind_path);
+    let mut command = if settings.is_aslr_enabled {
+        Command::new(&settings.valgrind_path)
+    } else {
+        valgrind_without_aslr(&settings.valgrind_path, &get_arch())
+    };
     command.arg("--tool=callgrind");
-    command.arg(&format!("--collect-atstart={}", format_bool(settings.collect_atstart)));
+    command.arg(&format!(
+        "--collect-atstart={}",
+        format_bool(settings.collect_atstart)
+    ));
     command.arg(&format!("--cache-sim={}", format_bool(settings.cache_sim)));
     command
 }
@@ -23,7 +30,7 @@ pub(crate) fn spawn_callgrind_instances(settings: &BenchmarkSettings) {
     for (index, run) in settings.functions.iter().enumerate() {
         let mut command = prepare_command(settings);
         for filter in &run.filters {
-            command.arg(format!("--toggle-collect=\"{}\"", filter));
+            command.arg(format!("--toggle-collect={}", filter));
         }
 
         command.arg(std::env::current_exe().unwrap());

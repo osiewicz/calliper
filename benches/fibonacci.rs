@@ -1,5 +1,5 @@
-use calliper::{BenchmarkSettings, BenchmarkRun, run};
 use calliper::utils::black_box;
+use calliper::{run, BenchmarkRun, BenchmarkSettings};
 
 #[inline(never)]
 #[no_mangle]
