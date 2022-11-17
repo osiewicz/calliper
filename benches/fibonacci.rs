@@ -25,11 +25,11 @@ fn fibonacci_quick(n: u64) -> u64 {
 }
 
 fn run_bench() {
-    black_box(fibonacci_slow(black_box(20)));
+    black_box(fibonacci_quick(black_box(20)));
 }
 
 fn run_slow_bench() {
-    black_box(fibonacci_quick(black_box(20)));
+    black_box(fibonacci_slow(black_box(20)));
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
