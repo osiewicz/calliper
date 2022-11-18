@@ -23,7 +23,21 @@ fn prepare_command(settings: &BenchmarkSettings) -> Command {
         "--collect-atstart={}",
         format_bool(settings.collect_atstart)
     ));
-    command.arg(&format!("--cache-sim={}", format_bool(settings.cache_sim)));
+    if let Some(cache) = &settings.cache {
+        command.arg("--cache-sim=no");
+        for (prefix, cache_params) in &[
+            ("D1", &cache.first_level_data),
+            ("L1", &cache.first_level_code),
+            ("LL", &cache.last_level),
+        ] {
+            if let Some(params) = &cache_params {
+                command.arg(&format!(
+                    "--{}={},{},{}",
+                    prefix, params.size, params.associativity, params.line_size
+                ));
+            }
+        }
+    }
     command
 }
 pub(crate) fn spawn_callgrind_instances(settings: &BenchmarkSettings) {

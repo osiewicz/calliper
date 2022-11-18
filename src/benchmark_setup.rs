@@ -6,9 +6,7 @@ use thiserror::Error;
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
 pub struct BenchmarkSettings {
     pub valgrind_path: String,
-    pub l1_cache_size: u64,
-    pub l2_cache_size: u64,
-    pub cache_sim: bool,
+    pub cache: Option<CacheOptions>,
     pub branch_sim: bool,
     pub is_aslr_enabled: bool,
     pub functions: Vec<BenchmarkRun>,
@@ -18,13 +16,25 @@ pub struct BenchmarkSettings {
     pub collect_atstart: bool,
 }
 
+#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+pub struct CacheOptions {
+    pub first_level_data: Option<CacheParameters>,
+    pub first_level_code: Option<CacheParameters>,
+    pub last_level: Option<CacheParameters>,
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+pub struct CacheParameters {
+    pub size: usize,
+    pub associativity: usize,
+    pub line_size: usize,
+}
+
 impl Default for BenchmarkSettings {
     fn default() -> Self {
         Self {
             valgrind_path: "valgrind".to_owned(),
-            l1_cache_size: 32768,
-            l2_cache_size: 32768,
-            cache_sim: true,
+            cache: None,
             branch_sim: false,
             is_aslr_enabled: false,
             functions: vec![],
