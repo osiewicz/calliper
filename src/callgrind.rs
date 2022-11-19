@@ -2,7 +2,7 @@ use crate::benchmark_setup::BenchmarkSettings;
 use std::process::{Command, Stdio};
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
-pub struct ParsedCallgrindOutput;
+pub struct ParsedCallgrindOutput(String);
 
 fn format_bool(value: bool) -> &'static str {
     if value {
@@ -40,7 +40,13 @@ fn prepare_command(settings: &BenchmarkSettings) -> Command {
     }
     command
 }
-pub(crate) fn spawn_callgrind_instances(settings: &BenchmarkSettings) {
+
+pub(crate) type CallgrindOutput = String;
+pub(crate) type CallgrindError = Box<dyn std::error::Error>;
+
+pub(crate) fn spawn_callgrind_instances(
+    settings: &BenchmarkSettings,
+) -> Result<Vec<CallgrindOutput>, CallgrindError> {
     for (index, run) in settings.functions.iter().enumerate() {
         let mut command = prepare_command(settings);
         for filter in &run.filters {
@@ -51,6 +57,7 @@ pub(crate) fn spawn_callgrind_instances(settings: &BenchmarkSettings) {
         command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
         command.spawn().unwrap().wait().unwrap();
     }
+    Ok(vec![])
 }
 
 #[cfg(target_os = "freebsd")]

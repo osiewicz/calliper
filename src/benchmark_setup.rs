@@ -80,7 +80,8 @@ pub fn run(settings: &BenchmarkSettings) -> Result<Vec<BenchmarkResult>, Callipe
                 .map(|bench| (bench.func)())?;
         }
         Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
-            spawn_callgrind_instances(settings);
+            let outputs = spawn_callgrind_instances(settings)?;
+            assert_eq!(outputs.len(), settings.functions.len());
         }
         Err(e) => return Err(e.into()),
     }
