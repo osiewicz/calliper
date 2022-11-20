@@ -18,6 +18,8 @@ fn prepare_command(settings: &BenchmarkSettings) -> Command {
     } else {
         valgrind_without_aslr(&settings.valgrind_path, &get_arch())
     };
+    command.stdout(Stdio::piped());
+    command.stderr(Stdio::piped());
     command.arg("--tool=callgrind");
     command.arg(&format!(
         "--collect-atstart={}",
@@ -60,13 +62,16 @@ pub(crate) fn spawn_callgrind_instances(
 
         command.arg(std::env::current_exe().unwrap());
         command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
-        let mut child = command.spawn().unwrap();
-        let _ = child.wait().unwrap();
+        let child = command.spawn().unwrap();
+        let id = child.id();
+        let output = child.wait_with_output().unwrap();
+        assert_eq!(output.status.code(), Some(0));
         if settings.cleanup_files {
-            let name = callgrind_output_name(child.id());
+            let name = callgrind_output_name(id);
             std::fs::remove_file(&name)?;
         }
-        ret.push("Some output".to_owned());
+        assert!(output.stderr.len() > 0);
+        ret.push(std::str::from_utf8(&output.stderr)?.into());
     }
     Ok(ret)
 }
