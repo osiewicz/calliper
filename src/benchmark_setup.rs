@@ -59,6 +59,7 @@ pub enum CalliperError {
     },
 }
 
+#[derive(Clone, PartialEq)]
 pub struct BenchmarkResult<'a> {
     run: &'a BenchmarkRun,
     run_idx: usize,
@@ -92,4 +93,5 @@ pub fn run(settings: &BenchmarkSettings) -> Result<Vec<BenchmarkResult>, Callipe
 pub struct BenchmarkRun {
     pub func: fn(),
     pub filters: Vec<String>,
+    pub output_file: Option<String>,
 }

@@ -59,6 +59,9 @@ pub(crate) fn spawn_callgrind_instances(
         for filter in &run.filters {
             command.arg(format!("--toggle-collect={}", filter));
         }
+        if let Some(out_file) = run.output_file.as_ref() {
+            command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
+        }
 
         command.arg(std::env::current_exe().unwrap());
         command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());

@@ -37,10 +37,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     builder.functions.push(BenchmarkRun {
         func: run_bench,
         filters: vec!["*fibonacci_quick*".into()],
+        output_file: None,
     });
     builder.functions.push(BenchmarkRun {
         func: run_slow_bench,
         filters: vec!["*fibonacci_slow*".into()],
+        output_file: None,
     });
     run(&builder).unwrap();
     Ok(())
