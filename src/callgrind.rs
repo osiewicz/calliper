@@ -26,7 +26,7 @@ fn prepare_command(settings: &BenchmarkSettings) -> Command {
         format_bool(settings.collect_atstart)
     ));
     if let Some(cache) = &settings.cache {
-        command.arg("--cache-sim=no");
+        command.arg("--cache-sim=yes");
         for (prefix, cache_params) in &[
             ("D1", &cache.first_level_data),
             ("L1", &cache.first_level_code),
