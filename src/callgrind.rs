@@ -12,7 +12,7 @@ fn format_bool(value: bool) -> &'static str {
     }
 }
 
-fn prepare_command(settings: &BenchmarkSettings) -> Command {
+fn prepare_command(settings: &BenchmarkSettings, index: usize) -> Command {
     let mut command = if settings.is_aslr_enabled {
         Command::new(&settings.valgrind_path)
     } else {
@@ -40,14 +40,29 @@ fn prepare_command(settings: &BenchmarkSettings) -> Command {
             }
         }
     }
+    let run = &settings.functions[index];
+    for filter in &run.filters {
+        command.arg(format!("--toggle-collect={}", filter));
+    }
+    if let Some(out_file) = run.output_file.as_ref() {
+        command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
+    }
+
+    command.arg(std::env::current_exe().unwrap());
+    command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
+
     command
 }
 
 pub(crate) type CallgrindOutput = String;
 pub(crate) type CallgrindError = Box<dyn std::error::Error>;
 
-fn callgrind_output_name(pid: u32) -> String {
-    format!("callgrind.out.{}", pid)
+fn callgrind_output_name(pid: u32, user_output: &Option<String>) -> String {
+    if let Some(output) = user_output {
+        output.clone()
+    } else {
+        format!("callgrind.out.{}", pid)
+    }
 }
 
 pub(crate) fn spawn_callgrind_instances(
@@ -55,22 +70,14 @@ pub(crate) fn spawn_callgrind_instances(
 ) -> Result<Vec<CallgrindOutput>, CallgrindError> {
     let mut ret = vec![];
     for (index, run) in settings.functions.iter().enumerate() {
-        let mut command = prepare_command(settings);
-        for filter in &run.filters {
-            command.arg(format!("--toggle-collect={}", filter));
-        }
-        if let Some(out_file) = run.output_file.as_ref() {
-            command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
-        }
+        let mut command = prepare_command(settings, index);
 
-        command.arg(std::env::current_exe().unwrap());
-        command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
         let child = command.spawn().unwrap();
         let id = child.id();
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
         if settings.cleanup_files {
-            let name = callgrind_output_name(id);
+            let name = callgrind_output_name(id, &run.output_file);
             std::fs::remove_file(&name)?;
         }
         assert!(output.stderr.len() > 0);
