@@ -16,7 +16,7 @@ pub struct BenchmarkSettings {
     pub collect_atstart: bool,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Hash, PartialEq, PartialOrd)]
 pub struct CacheOptions {
     pub first_level_data: Option<CacheParameters>,
     pub first_level_code: Option<CacheParameters>,
