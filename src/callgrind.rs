@@ -44,9 +44,14 @@ fn prepare_command(settings: &BenchmarkSettings) -> Command {
 pub(crate) type CallgrindOutput = String;
 pub(crate) type CallgrindError = Box<dyn std::error::Error>;
 
+fn callgrind_output_name(pid: u32) -> String {
+    format!("callgrind.out.{}", pid)
+}
+
 pub(crate) fn spawn_callgrind_instances(
     settings: &BenchmarkSettings,
 ) -> Result<Vec<CallgrindOutput>, CallgrindError> {
+    let mut ret = vec![];
     for (index, run) in settings.functions.iter().enumerate() {
         let mut command = prepare_command(settings);
         for filter in &run.filters {
@@ -55,9 +60,15 @@ pub(crate) fn spawn_callgrind_instances(
 
         command.arg(std::env::current_exe().unwrap());
         command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
-        command.spawn().unwrap().wait().unwrap();
+        let mut child = command.spawn().unwrap();
+        let _ = child.wait().unwrap();
+        if settings.cleanup_files {
+            let name = callgrind_output_name(child.id());
+            std::fs::remove_file(&name)?;
+        }
+        ret.push("Some output".to_owned());
     }
-    Ok(vec![])
+    Ok(ret)
 }
 
 #[cfg(target_os = "freebsd")]
