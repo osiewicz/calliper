@@ -25,6 +25,14 @@ fn prepare_command(settings: &BenchmarkSettings, index: usize) -> Command {
         "--collect-atstart={}",
         format_bool(settings.collect_atstart)
     ));
+    command.arg(&format!(
+        "--branch-sim={}",
+        format_bool(settings.branch_sim)
+    ));
+    command.arg(&format!(
+        "--collect-bus={}",
+        format_bool(settings.collect_bus)
+    ));
     if let Some(cache) = &settings.cache {
         command.arg("--cache-sim=yes");
         for (prefix, cache_params) in &[

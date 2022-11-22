@@ -34,6 +34,7 @@ fn run_slow_bench() {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut builder = BenchmarkSettings::default();
+    builder.branch_sim = true;
     builder.functions.push(BenchmarkRun {
         func: run_bench,
         filters: vec!["*fibonacci_quick*".into()],
