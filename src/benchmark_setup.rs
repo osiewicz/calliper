@@ -1,3 +1,4 @@
+#![allow(unused)]
 use super::callgrind::{spawn_callgrind_instances, ParsedCallgrindOutput};
 use super::utils;
 
@@ -5,15 +6,57 @@ use thiserror::Error;
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
 pub struct BenchmarkSettings {
-    pub valgrind_path: String,
-    pub cache: Option<CacheOptions>,
-    pub branch_sim: bool,
-    pub is_aslr_enabled: bool,
-    pub functions: Vec<BenchmarkRun>,
-    pub cleanup_files: bool,
-    pub parallelism_level: u64,
-    pub collect_bus: bool,
-    pub collect_atstart: bool,
+    pub(crate) valgrind_path: String,
+    pub(crate) cache: Option<CacheOptions>,
+    pub(crate) branch_sim: bool,
+    pub(crate) is_aslr_enabled: bool,
+    pub(crate) functions: Vec<BenchmarkRun>,
+    pub(crate) cleanup_files: bool,
+    pub(crate) parallelism: u64,
+    pub(crate) collect_bus: bool,
+    pub(crate) collect_atstart: bool,
+}
+
+impl BenchmarkSettings {
+    fn new() -> Self {
+        Self::default()
+    }
+    pub fn valgrind(mut self, path: impl Into<String>) -> Self {
+        self.valgrind_path = path.into();
+        self
+    }
+    pub fn cache(mut self, settings: impl Into<Option<CacheOptions>>) -> Self {
+        self.cache = settings.into();
+        self
+    }
+    pub fn branch_sim(mut self, is_enabled: bool) -> Self {
+        self.branch_sim = is_enabled;
+        self
+    }
+    pub fn aslr(mut self, is_enabled: bool) -> Self {
+        self.is_aslr_enabled = is_enabled;
+        self
+    }
+    pub fn functions(mut self, functions: Vec<BenchmarkRun>) -> Self {
+        self.functions = functions;
+        self
+    }
+    pub fn cleanup_files(mut self, is_enabled: bool) -> Self {
+        self.cleanup_files = is_enabled;
+        self
+    }
+    pub fn parallelism(mut self, parallelism: u64) -> Self {
+        self.parallelism = parallelism;
+        self
+    }
+    pub fn collect_bus(mut self, is_enabled: bool) -> Self {
+        self.collect_bus = is_enabled;
+        self
+    }
+    pub fn collect_atstart(mut self, is_enabled: bool) -> Self {
+        self.collect_atstart = is_enabled;
+        self
+    }
 }
 
 #[derive(Clone, Debug, Default, Hash, PartialEq, PartialOrd)]
@@ -39,7 +82,7 @@ impl Default for BenchmarkSettings {
             is_aslr_enabled: false,
             functions: vec![],
             cleanup_files: true,
-            parallelism_level: 1,
+            parallelism: 1,
             collect_bus: false,
             collect_atstart: false,
         }
@@ -91,7 +134,25 @@ pub fn run(settings: &BenchmarkSettings) -> Result<Vec<BenchmarkResult>, Callipe
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
 pub struct BenchmarkRun {
-    pub func: fn(),
-    pub filters: Vec<String>,
-    pub output_file: Option<String>,
+    pub(crate) func: fn(),
+    pub(crate) filters: Vec<String>,
+    pub(crate) output_file: Option<String>,
+}
+
+impl BenchmarkRun {
+    pub fn new(func: fn()) -> Self {
+        Self {
+            func,
+            filters: vec![],
+            output_file: None,
+        }
+    }
+    pub fn filters(mut self, filters: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        self.filters = filters.into_iter().map(|s| s.into()).collect();
+        self
+    }
+    pub fn output(mut self, path: impl Into<String>) -> Self {
+        self.output_file = Some(path.into());
+        self
+    }
 }

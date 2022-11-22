@@ -33,18 +33,12 @@ fn run_slow_bench() {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut builder = BenchmarkSettings::default();
-    builder.branch_sim = true;
-    builder.functions.push(BenchmarkRun {
-        func: run_bench,
-        filters: vec!["*fibonacci_quick*".into()],
-        output_file: None,
-    });
-    builder.functions.push(BenchmarkRun {
-        func: run_slow_bench,
-        filters: vec!["*fibonacci_slow*".into()],
-        output_file: None,
-    });
+    let builder = BenchmarkSettings::default()
+        .branch_sim(true)
+        .functions(vec![
+            BenchmarkRun::new(run_bench).filters(["*fibonacci_quick*"]),
+            BenchmarkRun::new(run_slow_bench).filters(["*fibonacci_slow*"]),
+        ]);
     run(&builder).unwrap();
     Ok(())
 }
