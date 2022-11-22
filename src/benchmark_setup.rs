@@ -37,8 +37,8 @@ impl BenchmarkSettings {
         self.is_aslr_enabled = is_enabled;
         self
     }
-    pub fn functions(mut self, functions: Vec<BenchmarkRun>) -> Self {
-        self.functions = functions;
+    pub fn functions(mut self, functions: impl IntoIterator<Item = BenchmarkRun>) -> Self {
+        self.functions = functions.into_iter().collect();
         self
     }
     pub fn cleanup_files(mut self, is_enabled: bool) -> Self {
