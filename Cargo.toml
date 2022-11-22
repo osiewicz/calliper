@@ -3,6 +3,9 @@ name = "calliper"
 authors = ["Piotr Osiewicz <peterosiewicz@gmail.com>"]
 version = "0.0.0"
 edition = "2021"
+rust-version = "1.56"
+repository = "https://github.com/osiewicz/calliper"
+homepage = "https://github.com/osiewicz/calliper"
 
 description = "Fine-grained benchmarking made easy."
 readme = "README.md"
