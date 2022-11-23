@@ -1,7 +1,7 @@
-use crate::callgrind::{spawn_callgrind_instances, ParsedCallgrindOutput};
+use crate::callgrind::{spawn_callgrind, ParsedCallgrindOutput};
 use crate::error::CalliperError;
 use crate::utils;
-use crate::Instance;
+use crate::ScenarioConfig;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Report<'a> {
@@ -27,7 +27,7 @@ pub fn run<'a>(
                 .map(|bench| (bench.func)())?;
         }
         Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
-            let outputs = spawn_callgrind_instances(&settings)?;
+            let outputs = spawn_callgrind(&settings)?;
             assert_eq!(outputs.len(), settings.len());
         }
         Err(e) => return Err(e.into()),
@@ -35,18 +35,19 @@ pub fn run<'a>(
     Ok(vec![])
 }
 
+/// Scenario defines benchmark target and it's auxiliary options.
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct Scenario {
-    pub(crate) instance: Instance,
+    pub(crate) config: ScenarioConfig,
     pub(crate) func: fn(),
     pub(crate) filters: Vec<String>,
     pub(crate) output_file: Option<String>,
 }
 
 impl Scenario {
-    pub fn new(func: fn(), instance: &Instance) -> Self {
+    pub fn new(func: fn(), config: &ScenarioConfig) -> Self {
         Self {
-            instance: instance.clone(),
+            config: config.clone(),
             func,
             filters: vec![],
             output_file: None,

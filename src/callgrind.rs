@@ -13,28 +13,28 @@ fn format_bool(value: bool) -> &'static str {
 }
 
 fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
-    let instance = &scenario.instance;
-    let mut command = if instance.is_aslr_enabled {
-        Command::new(&instance.valgrind_path)
+    let config = &scenario.config;
+    let mut command = if config.is_aslr_enabled {
+        Command::new(&config.valgrind_path)
     } else {
-        valgrind_without_aslr(&instance.valgrind_path, &get_arch())
+        valgrind_without_aslr(&config.valgrind_path, &get_arch())
     };
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());
     command.arg("--tool=callgrind");
     command.arg(&format!(
         "--collect-atstart={}",
-        format_bool(instance.collect_atstart)
+        format_bool(config.collect_atstart)
     ));
     command.arg(&format!(
         "--branch-sim={}",
-        format_bool(instance.branch_sim)
+        format_bool(config.branch_sim)
     ));
     command.arg(&format!(
         "--collect-bus={}",
-        format_bool(instance.collect_bus)
+        format_bool(config.collect_bus)
     ));
-    if let Some(cache) = &instance.cache {
+    if let Some(cache) = &config.cache {
         command.arg("--cache-sim=yes");
         for (prefix, cache_params) in &[
             ("D1", &cache.first_level_data),
@@ -73,7 +73,7 @@ fn callgrind_output_name(pid: u32, user_output: &Option<String>) -> String {
     }
 }
 
-pub(crate) fn spawn_callgrind_instances(
+pub(crate) fn spawn_callgrind(
     scenarios: &[&Scenario],
 ) -> Result<Vec<CallgrindOutput>, CallgrindError> {
     let mut ret = vec![];
@@ -84,7 +84,7 @@ pub(crate) fn spawn_callgrind_instances(
         let id = child.id();
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
-        if run.instance.cleanup_files {
+        if run.config.cleanup_files {
             let name = callgrind_output_name(id, &run.output_file);
             std::fs::remove_file(&name)?;
         }

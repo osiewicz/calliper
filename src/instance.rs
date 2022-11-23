@@ -1,8 +1,11 @@
 #![allow(unused)]
 use super::utils;
 
+/// Callgrind execution settings.
+///
+/// `ScenarioConfig` defines scenario-agnostic 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
-pub struct Instance {
+pub struct ScenarioConfig {
     pub(crate) valgrind_path: String,
     pub(crate) cache: Option<CacheOptions>,
     pub(crate) branch_sim: bool,
@@ -13,7 +16,7 @@ pub struct Instance {
     pub(crate) collect_atstart: bool,
 }
 
-impl Instance {
+impl ScenarioConfig {
     fn new() -> Self {
         Self::default()
     }
@@ -65,7 +68,7 @@ pub struct CacheParameters {
     pub line_size: usize,
 }
 
-impl Default for Instance {
+impl Default for ScenarioConfig {
     fn default() -> Self {
         Self {
             valgrind_path: "valgrind".to_owned(),

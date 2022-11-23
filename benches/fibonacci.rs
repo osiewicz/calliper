@@ -1,5 +1,5 @@
 use calliper::utils::black_box;
-use calliper::{run, Instance, Scenario};
+use calliper::{run, ScenarioConfig, Scenario};
 
 #[inline(never)]
 #[no_mangle]
@@ -33,7 +33,7 @@ fn run_slow_bench() {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let instance = Instance::default().branch_sim(true);
+    let instance = ScenarioConfig::default().branch_sim(true);
     let benches = [
         Scenario::new(run_bench, &instance).filters(["*fibonacci_quick*"]),
         Scenario::new(run_slow_bench, &instance).filters(["*fibonacci_slow*"]),

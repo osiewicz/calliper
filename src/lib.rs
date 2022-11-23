@@ -11,5 +11,5 @@ mod instance;
 mod scenario;
 pub mod utils;
 
-pub use instance::Instance;
+pub use instance::ScenarioConfig;
 pub use scenario::{run, Scenario};
