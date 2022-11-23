@@ -23,10 +23,6 @@ fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
     command.stderr(Stdio::piped());
     command.arg("--tool=callgrind");
     command.arg(&format!(
-        "--collect-atstart={}",
-        format_bool(config.collect_atstart)
-    ));
-    command.arg(&format!(
         "--branch-sim={}",
         format_bool(config.branch_sim)
     ));

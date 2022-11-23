@@ -13,7 +13,6 @@ pub struct ScenarioConfig {
     pub(crate) cleanup_files: bool,
     pub(crate) parallelism: u64,
     pub(crate) collect_bus: bool,
-    pub(crate) collect_atstart: bool,
 }
 
 impl ScenarioConfig {
@@ -48,10 +47,6 @@ impl ScenarioConfig {
         self.collect_bus = is_enabled;
         self
     }
-    pub fn collect_atstart(mut self, is_enabled: bool) -> Self {
-        self.collect_atstart = is_enabled;
-        self
-    }
 }
 
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
@@ -78,7 +73,6 @@ impl Default for ScenarioConfig {
             cleanup_files: true,
             parallelism: 1,
             collect_bus: false,
-            collect_atstart: false,
         }
     }
 }
