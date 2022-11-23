@@ -1,4 +1,4 @@
-use crate::benchmark_setup::BenchmarkSettings;
+use crate::benchmark_setup::Scenario;
 use std::process::{Command, Stdio};
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
@@ -12,28 +12,29 @@ fn format_bool(value: bool) -> &'static str {
     }
 }
 
-fn prepare_command(settings: &BenchmarkSettings, index: usize) -> Command {
-    let mut command = if settings.is_aslr_enabled {
-        Command::new(&settings.valgrind_path)
+fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
+    let instance = &scenario.instance;
+    let mut command = if instance.is_aslr_enabled {
+        Command::new(&instance.valgrind_path)
     } else {
-        valgrind_without_aslr(&settings.valgrind_path, &get_arch())
+        valgrind_without_aslr(&instance.valgrind_path, &get_arch())
     };
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());
     command.arg("--tool=callgrind");
     command.arg(&format!(
         "--collect-atstart={}",
-        format_bool(settings.collect_atstart)
+        format_bool(instance.collect_atstart)
     ));
     command.arg(&format!(
         "--branch-sim={}",
-        format_bool(settings.branch_sim)
+        format_bool(instance.branch_sim)
     ));
     command.arg(&format!(
         "--collect-bus={}",
-        format_bool(settings.collect_bus)
+        format_bool(instance.collect_bus)
     ));
-    if let Some(cache) = &settings.cache {
+    if let Some(cache) = &instance.cache {
         command.arg("--cache-sim=yes");
         for (prefix, cache_params) in &[
             ("D1", &cache.first_level_data),
@@ -48,16 +49,15 @@ fn prepare_command(settings: &BenchmarkSettings, index: usize) -> Command {
             }
         }
     }
-    let run = &settings.functions[index];
-    for filter in &run.filters {
+    for filter in &scenario.filters {
         command.arg(format!("--toggle-collect={}", filter));
     }
-    if let Some(out_file) = run.output_file.as_ref() {
+    if let Some(out_file) = scenario.output_file.as_ref() {
         command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
     }
 
     command.arg(std::env::current_exe().unwrap());
-    command.env(super::utils::CALLIPER_RUN_ID, &index.to_string());
+    command.env(super::utils::CALLIPER_RUN_ID, identifier);
 
     command
 }
@@ -74,17 +74,17 @@ fn callgrind_output_name(pid: u32, user_output: &Option<String>) -> String {
 }
 
 pub(crate) fn spawn_callgrind_instances(
-    settings: &BenchmarkSettings,
+    scenarios: &Vec<&Scenario>,
 ) -> Result<Vec<CallgrindOutput>, CallgrindError> {
     let mut ret = vec![];
-    for (index, run) in settings.functions.iter().enumerate() {
-        let mut command = prepare_command(settings, index);
+    for (index, run) in scenarios.iter().enumerate() {
+        let mut command = prepare_command(run, index.to_string());
 
         let child = command.spawn().unwrap();
         let id = child.id();
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
-        if settings.cleanup_files {
+        if run.instance.cleanup_files {
             let name = callgrind_output_name(id, &run.output_file);
             std::fs::remove_file(&name)?;
         }

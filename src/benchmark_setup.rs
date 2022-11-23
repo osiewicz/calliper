@@ -2,22 +2,23 @@
 use super::callgrind::{spawn_callgrind_instances, ParsedCallgrindOutput};
 use super::utils;
 
+use core::borrow::Borrow;
+
 use thiserror::Error;
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
-pub struct BenchmarkSettings {
+pub struct Instance {
     pub(crate) valgrind_path: String,
     pub(crate) cache: Option<CacheOptions>,
     pub(crate) branch_sim: bool,
     pub(crate) is_aslr_enabled: bool,
-    pub(crate) functions: Vec<BenchmarkRun>,
     pub(crate) cleanup_files: bool,
     pub(crate) parallelism: u64,
     pub(crate) collect_bus: bool,
     pub(crate) collect_atstart: bool,
 }
 
-impl BenchmarkSettings {
+impl Instance {
     fn new() -> Self {
         Self::default()
     }
@@ -35,10 +36,6 @@ impl BenchmarkSettings {
     }
     pub fn aslr(mut self, is_enabled: bool) -> Self {
         self.is_aslr_enabled = is_enabled;
-        self
-    }
-    pub fn functions(mut self, functions: impl IntoIterator<Item = BenchmarkRun>) -> Self {
-        self.functions = functions.into_iter().collect();
         self
     }
     pub fn cleanup_files(mut self, is_enabled: bool) -> Self {
@@ -73,14 +70,13 @@ pub struct CacheParameters {
     pub line_size: usize,
 }
 
-impl Default for BenchmarkSettings {
+impl Default for Instance {
     fn default() -> Self {
         Self {
             valgrind_path: "valgrind".to_owned(),
             cache: None,
             branch_sim: false,
             is_aslr_enabled: false,
-            functions: vec![],
             cleanup_files: true,
             parallelism: 1,
             collect_bus: false,
@@ -108,29 +104,31 @@ pub enum CalliperError {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct BenchmarkResult<'a> {
-    run: &'a BenchmarkRun,
+pub struct Report<'a> {
+    run: &'a Scenario,
     run_idx: usize,
     results: ParsedCallgrindOutput,
 }
 
-pub fn run(settings: &BenchmarkSettings) -> Result<Vec<BenchmarkResult>, CalliperError> {
+pub fn run<'a>(
+    settings: impl IntoIterator<Item = &'a Scenario>,
+) -> Result<Vec<Report<'a>>, CalliperError> {
     let run_id = utils::get_run_id();
+    let settings: Vec<&Scenario> = settings.into_iter().collect();
     match run_id {
         Ok(run_id) => {
             // Running under callgrind already.
             settings
-                .functions
                 .get(run_id)
                 .ok_or(CalliperError::RunIdOutOfBounds {
                     value: run_id,
-                    limit: settings.functions.len(),
+                    limit: settings.len(),
                 })
                 .map(|bench| (bench.func)())?;
         }
         Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
-            let outputs = spawn_callgrind_instances(settings)?;
-            assert_eq!(outputs.len(), settings.functions.len());
+            let outputs = spawn_callgrind_instances(&settings)?;
+            assert_eq!(outputs.len(), settings.len());
         }
         Err(e) => return Err(e.into()),
     }
@@ -138,15 +136,17 @@ pub fn run(settings: &BenchmarkSettings) -> Result<Vec<BenchmarkResult>, Callipe
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
-pub struct BenchmarkRun {
+pub struct Scenario {
+    pub(crate) instance: Instance,
     pub(crate) func: fn(),
     pub(crate) filters: Vec<String>,
     pub(crate) output_file: Option<String>,
 }
 
-impl BenchmarkRun {
-    pub fn new(func: fn()) -> Self {
+impl Scenario {
+    pub fn new(func: fn(), instance: &Instance) -> Self {
         Self {
+            instance: instance.clone(),
             func,
             filters: vec![],
             output_file: None,
