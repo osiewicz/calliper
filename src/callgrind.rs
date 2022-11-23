@@ -1,4 +1,4 @@
-use crate::benchmark_setup::Scenario;
+use crate::Scenario;
 use std::process::{Command, Stdio};
 
 #[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
