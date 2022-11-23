@@ -3,7 +3,7 @@ use crate::error::CalliperError;
 use crate::utils;
 use crate::Instance;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Report<'a> {
     run: &'a Scenario,
     run_idx: usize,
@@ -35,7 +35,7 @@ pub fn run<'a>(
     Ok(vec![])
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct Scenario {
     pub(crate) instance: Instance,
     pub(crate) func: fn(),

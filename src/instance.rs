@@ -1,7 +1,7 @@
 #![allow(unused)]
 use super::utils;
 
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct Instance {
     pub(crate) valgrind_path: String,
     pub(crate) cache: Option<CacheOptions>,
@@ -51,14 +51,14 @@ impl Instance {
     }
 }
 
-#[derive(Clone, Debug, Default, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
 pub struct CacheOptions {
     pub first_level_data: Option<CacheParameters>,
     pub first_level_code: Option<CacheParameters>,
     pub last_level: Option<CacheParameters>,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct CacheParameters {
     pub size: usize,
     pub associativity: usize,

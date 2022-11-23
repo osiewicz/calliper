@@ -1,7 +1,7 @@
 use crate::Scenario;
 use std::process::{Command, Stdio};
 
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct ParsedCallgrindOutput(String);
 
 fn format_bool(value: bool) -> &'static str {
@@ -74,7 +74,7 @@ fn callgrind_output_name(pid: u32, user_output: &Option<String>) -> String {
 }
 
 pub(crate) fn spawn_callgrind_instances(
-    scenarios: &Vec<&Scenario>,
+    scenarios: &[&Scenario],
 ) -> Result<Vec<CallgrindOutput>, CallgrindError> {
     let mut ret = vec![];
     for (index, run) in scenarios.iter().enumerate() {
@@ -88,7 +88,7 @@ pub(crate) fn spawn_callgrind_instances(
             let name = callgrind_output_name(id, &run.output_file);
             std::fs::remove_file(&name)?;
         }
-        assert!(output.stderr.len() > 0);
+        assert!(!output.stderr.is_empty());
         ret.push(std::str::from_utf8(&output.stderr)?.into());
     }
     Ok(ret)
