@@ -1,11 +1,10 @@
 use calliper::utils::black_box;
-use calliper::{run, ScenarioConfig, Scenario};
+use calliper::{run, Scenario, ScenarioConfig};
 
 #[inline(never)]
 #[no_mangle]
 fn binary_search_impl(haystack: &[u8], needle: u8) -> Result<usize, usize> {
     haystack.binary_search(&needle)
-    
 }
 fn bench_binary_search() {
     let range = (0..255).collect::<Vec<_>>();

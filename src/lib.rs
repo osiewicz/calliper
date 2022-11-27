@@ -5,11 +5,12 @@
 //! profiler. It aims to serve both upcoming and present benchmarking gurus.
 //! Whenever possible, terminology/naming of calliper aligns with that of Callgrind (in i.e.
 //! parameter names).
+//#![deny(missing_docs)]
 mod callgrind;
 mod error;
 mod instance;
 mod scenario;
 pub mod utils;
 
-pub use instance::{CacheOptions, ScenarioConfig};
+pub use instance::{CacheOptions, CacheParameters, ScenarioConfig};
 pub use scenario::{run, Scenario};

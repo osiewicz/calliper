@@ -1,5 +1,5 @@
 use calliper::utils::black_box;
-use calliper::{run, ScenarioConfig, Scenario};
+use calliper::{run, Scenario, ScenarioConfig};
 
 #[inline(never)]
 #[no_mangle]
