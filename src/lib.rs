@@ -11,5 +11,5 @@ mod instance;
 mod scenario;
 pub mod utils;
 
-pub use instance::ScenarioConfig;
+pub use instance::{CacheOptions, ScenarioConfig};
 pub use scenario::{run, Scenario};
