@@ -46,10 +46,10 @@ fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
             }
         }
     }
-    for filter in &scenario.filters {
+    for filter in scenario.config.get_filters() {
         command.arg(format!("--toggle-collect={}", filter));
     }
-    if let Some(out_file) = scenario.output_file.as_ref() {
+    if let Some(out_file) = scenario.config.get_output_file() {
         command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
     }
 
@@ -62,9 +62,9 @@ fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
 pub(crate) type CallgrindOutput = String;
 pub(crate) type CallgrindError = Box<dyn std::error::Error>;
 
-fn callgrind_output_name(pid: u32, user_output: &Option<String>) -> String {
+fn callgrind_output_name(pid: u32, user_output: &Option<&str>) -> String {
     if let Some(output) = user_output {
-        output.clone()
+        output.to_string()
     } else {
         format!("callgrind.out.{}", pid)
     }
@@ -82,7 +82,7 @@ pub(crate) fn spawn_callgrind(
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
         if run.config.get_cleanup_files() {
-            let name = callgrind_output_name(id, &run.output_file);
+            let name = callgrind_output_name(id, &run.config.get_output_file());
             std::fs::remove_file(&name)?;
         }
         assert!(!output.stderr.is_empty());

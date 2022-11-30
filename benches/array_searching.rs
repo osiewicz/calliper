@@ -25,8 +25,8 @@ fn bench_linear_search() {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let instance = ScenarioConfig::default();
     let benches = [
-        Scenario::new(bench_linear_search, &instance),
-        Scenario::new(bench_binary_search, &instance),
+        Scenario::new(bench_linear_search).with_config(instance.clone()),
+        Scenario::new(bench_binary_search).with_config(instance),
     ];
     run(&benches).unwrap();
     Ok(())

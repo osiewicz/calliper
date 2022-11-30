@@ -13,6 +13,8 @@ pub struct ScenarioConfig {
     pub(crate) cleanup_files: Option<bool>,
     pub(crate) parallelism: Option<u64>,
     pub(crate) collect_bus: Option<bool>,
+    pub(crate) filters: Option<Vec<String>>,
+    pub(crate) output_file: Option<Option<String>>,
 }
 
 impl ScenarioConfig {
@@ -76,6 +78,14 @@ impl ScenarioConfig {
         self.collect_bus = Some(is_enabled);
         self
     }
+    pub fn filters(mut self, filters: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        self.filters = Some(filters.into_iter().map(|s| s.into()).collect());
+        self
+    }
+    pub fn output(mut self, path: impl Into<String>) -> Self {
+        self.output_file = Some(Some(path.into()));
+        self
+    }
     pub fn get_valgrind(&self) -> &str {
         if let Some(v) = &self.valgrind_path {
             &v
@@ -98,6 +108,15 @@ impl ScenarioConfig {
     pub fn get_branch_sim(&self) -> bool {
         self.branch_sim.unwrap_or(false)
     }
+    pub fn get_output_file<'a>(&'a self) -> Option<&str> {
+        self.output_file
+            .as_ref()
+            .map(|o| o.as_deref())
+            .unwrap_or(None)
+    }
+    pub fn get_filters(&self) -> &[String] {
+        self.filters.as_deref().unwrap_or(&[])
+    }
     pub(crate) fn overwrite(self, other: Self) -> Self {
         Self {
             branch_sim: other.branch_sim.or(self.branch_sim),
@@ -107,6 +126,8 @@ impl ScenarioConfig {
             collect_bus: other.collect_bus.or(self.collect_bus),
             valgrind_path: other.valgrind_path.or(self.valgrind_path),
             cache: other.cache.or(self.cache),
+            filters: other.filters.or(self.filters),
+            output_file: other.output_file.or(self.output_file),
         }
     }
 }

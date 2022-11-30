@@ -40,25 +40,17 @@ pub fn run<'a>(
 pub struct Scenario {
     pub(crate) config: ScenarioConfig,
     pub(crate) func: fn(),
-    pub(crate) filters: Vec<String>,
-    pub(crate) output_file: Option<String>,
 }
 
 impl Scenario {
-    pub fn new(func: fn(), config: &ScenarioConfig) -> Self {
+    pub fn new(func: fn()) -> Self {
         Self {
-            config: config.clone(),
+            config: ScenarioConfig::default(),
             func,
-            filters: vec![],
-            output_file: None,
         }
     }
-    pub fn filters(mut self, filters: impl IntoIterator<Item = impl Into<String>>) -> Self {
-        self.filters = filters.into_iter().map(|s| s.into()).collect();
-        self
-    }
-    pub fn output(mut self, path: impl Into<String>) -> Self {
-        self.output_file = Some(path.into());
+    pub fn with_config(mut self, config: ScenarioConfig) -> Self {
+        self.config = config;
         self
     }
 }
