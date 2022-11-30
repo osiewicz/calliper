@@ -14,18 +14,22 @@ fn format_bool(value: bool) -> &'static str {
 
 fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
     let config = &scenario.config;
-    let mut command = if config.is_aslr_enabled {
-        Command::new(&config.valgrind_path)
+    let valgrind = config.get_valgrind();
+    let mut command = if config.get_aslr() {
+        Command::new(valgrind)
     } else {
-        valgrind_without_aslr(&config.valgrind_path, &get_arch())
+        valgrind_without_aslr(valgrind, &get_arch())
     };
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());
     command.arg("--tool=callgrind");
-    command.arg(&format!("--branch-sim={}", format_bool(config.branch_sim)));
+    command.arg(&format!(
+        "--branch-sim={}",
+        format_bool(config.get_branch_sim())
+    ));
     command.arg(&format!(
         "--collect-bus={}",
-        format_bool(config.collect_bus)
+        format_bool(config.get_collect_bus())
     ));
     if let Some(cache) = &config.cache {
         command.arg("--cache-sim=yes");
@@ -77,7 +81,7 @@ pub(crate) fn spawn_callgrind(
         let id = child.id();
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
-        if run.config.cleanup_files {
+        if run.config.get_cleanup_files() {
             let name = callgrind_output_name(id, &run.output_file);
             std::fs::remove_file(&name)?;
         }

@@ -4,15 +4,15 @@ use super::utils;
 /// Callgrind execution settings.
 ///
 /// `ScenarioConfig` defines scenario-agnostic
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
 pub struct ScenarioConfig {
-    pub(crate) valgrind_path: String,
+    pub(crate) valgrind_path: Option<String>,
     pub(crate) cache: Option<CacheOptions>,
-    pub(crate) branch_sim: bool,
-    pub(crate) is_aslr_enabled: bool,
-    pub(crate) cleanup_files: bool,
-    pub(crate) parallelism: u64,
-    pub(crate) collect_bus: bool,
+    pub(crate) branch_sim: Option<bool>,
+    pub(crate) is_aslr_enabled: Option<bool>,
+    pub(crate) cleanup_files: Option<bool>,
+    pub(crate) parallelism: Option<u64>,
+    pub(crate) collect_bus: Option<bool>,
 }
 
 impl ScenarioConfig {
@@ -22,7 +22,7 @@ impl ScenarioConfig {
     /// Valgrind executable path.
     /// Default value: "valgrind"
     pub fn valgrind(mut self, path: impl Into<String>) -> Self {
-        self.valgrind_path = path.into();
+        self.valgrind_path = Some(path.into());
         self
     }
     /// Configuration of cache simulation.
@@ -47,7 +47,7 @@ impl ScenarioConfig {
         self
     }
     pub fn branch_sim(mut self, is_enabled: bool) -> Self {
-        self.branch_sim = is_enabled;
+        self.branch_sim = Some(is_enabled);
         self
     }
     /// If set to true, Address Space Layout Randomization (ASLR) will be enabled.
@@ -56,25 +56,47 @@ impl ScenarioConfig {
     /// It is recommended to keep this turned off.
     /// Defaults to false.
     pub fn aslr(mut self, is_enabled: bool) -> Self {
-        self.is_aslr_enabled = is_enabled;
+        self.is_aslr_enabled = Some(is_enabled);
         self
     }
     /// If set to true, Callgrind output for this scenario will be cleared up.
     /// Defaults to true.
     pub fn cleanup_files(mut self, is_enabled: bool) -> Self {
-        self.cleanup_files = is_enabled;
+        self.cleanup_files = Some(is_enabled);
         self
     }
     /// An upper bound of Callgrind instances running at the same time. Since Callgrind does not measure wall time, it is acceptable to
     /// run different scenarios in parallel.
     /// Defaults to 1.
     pub fn parallelism(mut self, parallelism: u64) -> Self {
-        self.parallelism = parallelism;
+        self.parallelism = Some(parallelism);
         self
     }
     pub fn collect_bus(mut self, is_enabled: bool) -> Self {
-        self.collect_bus = is_enabled;
+        self.collect_bus = Some(is_enabled);
         self
+    }
+    pub fn get_valgrind(&self) -> &str {
+        if let Some(v) = &self.valgrind_path {
+            &v
+        } else {
+            "valgrind"
+        }
+    }
+    pub fn get_collect_bus(&self) -> bool {
+        self.collect_bus.unwrap_or(false)
+    }
+    pub fn get_parallelism(&self) -> u64 {
+        self.parallelism.unwrap_or(1)
+    }
+    pub fn get_cleanup_files(&self) -> bool {
+        self.cleanup_files.unwrap_or(true)
+    }
+    pub fn get_aslr(&self) -> bool {
+        self.is_aslr_enabled.unwrap_or(false)
+    }
+    pub fn get_branch_sim(&self) -> bool {
+        self.branch_sim.unwrap_or(false)
     }
 }
 
@@ -92,16 +114,3 @@ pub struct CacheParameters {
     pub line_size: usize,
 }
 
-impl Default for ScenarioConfig {
-    fn default() -> Self {
-        Self {
-            valgrind_path: "valgrind".to_owned(),
-            cache: None,
-            branch_sim: false,
-            is_aslr_enabled: false,
-            cleanup_files: true,
-            parallelism: 1,
-            collect_bus: false,
-        }
-    }
-}
