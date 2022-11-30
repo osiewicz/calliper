@@ -98,6 +98,17 @@ impl ScenarioConfig {
     pub fn get_branch_sim(&self) -> bool {
         self.branch_sim.unwrap_or(false)
     }
+    pub(crate) fn overwrite(self, other: Self) -> Self {
+        Self {
+            branch_sim: other.branch_sim.or(self.branch_sim),
+            is_aslr_enabled: other.is_aslr_enabled.or(self.is_aslr_enabled),
+            cleanup_files: other.cleanup_files.or(self.cleanup_files),
+            parallelism: other.parallelism.or(self.parallelism),
+            collect_bus: other.collect_bus.or(self.collect_bus),
+            valgrind_path: other.valgrind_path.or(self.valgrind_path),
+            cache: other.cache.or(self.cache),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
@@ -113,4 +124,3 @@ pub struct CacheParameters {
     pub associativity: usize,
     pub line_size: usize,
 }
-
