@@ -32,11 +32,13 @@ fn run_slow_bench() {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let instance = ScenarioConfig::default().branch_sim(true);
+    let runner = Runner::default().config(ScenarioConfig::default().branch_sim(true));
     let benches = [
-        Scenario::new(run_bench).with_config(instance.clone().filters(["*fibonacci_quick*"])),
-        Scenario::new(run_slow_bench).with_config(instance.filters(["*fibonacci_slow*"])),
+        Scenario::new(run_bench)
+            .with_config(ScenarioConfig::default().filters(["*fibonacci_quick*"])),
+        Scenario::new(run_slow_bench)
+            .with_config(ScenarioConfig::default().filters(["*fibonacci_slow*"])),
     ];
-    run(&benches).unwrap();
+    runner.run(&benches).unwrap();
     Ok(())
 }

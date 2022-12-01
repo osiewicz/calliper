@@ -10,29 +10,57 @@ pub struct Report<'a> {
     results: ParsedCallgrindOutput,
 }
 
-pub fn run<'a>(
-    settings: impl IntoIterator<Item = &'a Scenario>,
-) -> Result<Vec<Report<'a>>, CalliperError> {
-    let run_id = utils::get_run_id();
-    let settings: Vec<&Scenario> = settings.into_iter().collect();
-    match run_id {
-        Ok(run_id) => {
-            // Running under callgrind already.
-            settings
-                .get(run_id)
-                .ok_or(CalliperError::RunIdOutOfBounds {
-                    value: run_id,
-                    limit: settings.len(),
-                })
-                .map(|bench| (bench.func)())?;
+#[derive(Clone, Debug, PartialEq)]
+pub struct Runner {
+    _parallelism: usize,
+    defaults: ScenarioConfig,
+}
+
+impl Default for Runner {
+    fn default() -> Self {
+        Self {
+            _parallelism: 1,
+            defaults: ScenarioConfig::default(),
         }
-        Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
-            let outputs = spawn_callgrind(&settings)?;
-            assert_eq!(outputs.len(), settings.len());
-        }
-        Err(e) => return Err(e.into()),
     }
-    Ok(vec![])
+}
+
+impl Runner {
+    pub fn config(mut self, config: ScenarioConfig) -> Self {
+        self.defaults = config;
+        self
+    }
+    pub fn parallelism(mut self, parallelism: usize) -> Self {
+        assert_ne!(parallelism, 0);
+        self._parallelism = parallelism;
+        self
+    }
+
+    pub fn run<'a>(
+        &self,
+        settings: impl IntoIterator<Item = &'a Scenario>,
+    ) -> Result<Vec<Report<'a>>, CalliperError> {
+        let run_id = utils::get_run_id();
+        let settings: Vec<&Scenario> = settings.into_iter().collect();
+        match run_id {
+            Ok(run_id) => {
+                // Running under callgrind already.
+                settings
+                    .get(run_id)
+                    .ok_or(CalliperError::RunIdOutOfBounds {
+                        value: run_id,
+                        limit: settings.len(),
+                    })
+                    .map(|bench| (bench.func)())?;
+            }
+            Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
+                let outputs = spawn_callgrind(&settings)?;
+                assert_eq!(outputs.len(), settings.len());
+            }
+            Err(e) => return Err(e.into()),
+        }
+        Ok(vec![])
+    }
 }
 
 /// Scenario defines benchmark target and it's auxiliary options.
