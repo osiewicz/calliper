@@ -9,6 +9,7 @@
 mod callgrind;
 mod error;
 mod instance;
+pub mod prelude;
 mod scenario;
 pub mod utils;
 

@@ -1,7 +1,7 @@
 use crate::callgrind::{spawn_callgrind, ParsedCallgrindOutput};
 use crate::error::CalliperError;
+use crate::instance::ScenarioConfig;
 use crate::utils;
-use crate::ScenarioConfig;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Report<'a> {

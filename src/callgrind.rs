@@ -1,4 +1,4 @@
-use crate::Scenario;
+use crate::scenario::Scenario;
 use std::process::{Command, Stdio};
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]

@@ -1,5 +1,4 @@
-use calliper::utils::black_box;
-use calliper::{run, Scenario, ScenarioConfig};
+use calliper::prelude::*;
 
 #[inline(never)]
 #[no_mangle]
