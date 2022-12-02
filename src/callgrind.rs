@@ -1,9 +1,6 @@
 use crate::scenario::Scenario;
 use std::process::{Command, Stdio};
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
-pub struct ParsedCallgrindOutput(String);
-
 fn format_bool(value: bool) -> &'static str {
     if value {
         "yes"
@@ -59,34 +56,46 @@ fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
     command
 }
 
-pub(crate) type CallgrindOutput = String;
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct CallgrindResultFilename {
+    path: String,
+    should_delete: bool
+}
+
+impl Drop for CallgrindResultFilename {
+    fn drop(&mut self) {
+        if self.should_delete {
+            let _ = std::fs::remove_file(&self.path);
+        }
+    }
+}
+
 pub(crate) type CallgrindError = Box<dyn std::error::Error>;
 
-fn callgrind_output_name(pid: u32, user_output: &Option<&str>) -> String {
-    if let Some(output) = user_output {
+fn callgrind_output_name(pid: u32, user_output: &Option<&str>, should_delete: bool) -> CallgrindResultFilename {
+    let path = if let Some(output) = user_output {
         output.to_string()
     } else {
         format!("callgrind.out.{}", pid)
-    }
+    };
+    CallgrindResultFilename { path, should_delete }
 }
 
 pub(crate) fn spawn_callgrind(
     scenarios: &[&Scenario],
-) -> Result<Vec<CallgrindOutput>, CallgrindError> {
+) -> Result<Vec<CallgrindResultFilename>, CallgrindError> {
     let mut ret = vec![];
     for (index, run) in scenarios.iter().enumerate() {
         let mut command = prepare_command(run, index.to_string());
 
         let child = command.spawn().unwrap();
         let id = child.id();
+        let name = callgrind_output_name(id, &run.config.get_output_file(), run.config.get_cleanup_files());
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
-        if run.config.get_cleanup_files() {
-            let name = callgrind_output_name(id, &run.config.get_output_file());
-            std::fs::remove_file(&name)?;
-        }
-        assert!(!output.stderr.is_empty());
-        ret.push(std::str::from_utf8(&output.stderr)?.into());
+        // This is naturally subject to TOCTOU, but it's better than nothing. We'll recheck later on anyways.
+        assert!(std::path::Path::new(&name.path).exists());
+        ret.push(name);
     }
     Ok(ret)
 }

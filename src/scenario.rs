@@ -1,13 +1,14 @@
-use crate::callgrind::{spawn_callgrind, ParsedCallgrindOutput};
+use crate::callgrind::{spawn_callgrind, CallgrindResultFilename};
+use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::error::CalliperError;
 use crate::instance::ScenarioConfig;
 use crate::utils;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Report<'a> {
     run: &'a Scenario,
     run_idx: usize,
-    results: ParsedCallgrindOutput,
+    results: CallgrindResultFilename,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -30,6 +31,7 @@ impl Runner {
         self.defaults = config;
         self
     }
+
     pub fn parallelism(mut self, parallelism: usize) -> Self {
         assert_ne!(parallelism, 0);
         self._parallelism = parallelism;
@@ -52,14 +54,17 @@ impl Runner {
                         limit: settings.len(),
                     })
                     .map(|bench| (bench.func)())?;
+                // Return value doesn't matter here anyways, as it's not checked anywhere under callgrind.
+                return Ok(vec![]);
             }
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
                 let outputs = spawn_callgrind(&settings)?;
                 assert_eq!(outputs.len(), settings.len());
+                let ret = outputs.into_iter().enumerate().zip(settings).map(|((run_idx, output_path), run)| Report {run, run_idx, results: output_path}).collect();
+                return Ok(ret);
             }
             Err(e) => return Err(e.into()),
         }
-        Ok(vec![])
     }
 }
 
@@ -77,7 +82,7 @@ impl Scenario {
             func,
         }
     }
-    pub fn with_config(mut self, config: ScenarioConfig) -> Self {
+    pub fn config(mut self, config: ScenarioConfig) -> Self {
         self.config = config;
         self
     }
