@@ -1,4 +1,5 @@
 use crate::scenario::Scenario;
+use crate::instance::ScenarioConfig;
 use std::process::{Command, Stdio};
 
 fn format_bool(value: bool) -> &'static str {
@@ -9,8 +10,7 @@ fn format_bool(value: bool) -> &'static str {
     }
 }
 
-fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
-    let config = &scenario.config;
+fn prepare_command(config: &ScenarioConfig, identifier: String) -> Command {
     let valgrind = config.get_valgrind();
     let mut command = if config.get_aslr() {
         Command::new(valgrind)
@@ -43,10 +43,10 @@ fn prepare_command(scenario: &Scenario, identifier: String) -> Command {
             }
         }
     }
-    for filter in scenario.config.get_filters() {
+    for filter in config.get_filters() {
         command.arg(format!("--toggle-collect={}", filter));
     }
-    if let Some(out_file) = scenario.config.get_output_file() {
+    if let Some(out_file) = config.get_output_file() {
         command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
     }
 
@@ -83,14 +83,16 @@ fn callgrind_output_name(pid: u32, user_output: &Option<&str>, should_delete: bo
 
 pub(crate) fn spawn_callgrind(
     scenarios: &[&Scenario],
+    default: &ScenarioConfig
 ) -> Result<Vec<CallgrindResultFilename>, CallgrindError> {
     let mut ret = vec![];
     for (index, run) in scenarios.iter().enumerate() {
-        let mut command = prepare_command(run, index.to_string());
+        let config = default.clone().overwrite(run.config.clone());
+        let mut command = prepare_command(&config, index.to_string());
 
         let child = command.spawn().unwrap();
         let id = child.id();
-        let name = callgrind_output_name(id, &run.config.get_output_file(), run.config.get_cleanup_files());
+        let name = callgrind_output_name(id, &run.config.get_output_file(), config.get_cleanup_files());
         let output = child.wait_with_output().unwrap();
         assert_eq!(output.status.code(), Some(0));
         // This is naturally subject to TOCTOU, but it's better than nothing. We'll recheck later on anyways.

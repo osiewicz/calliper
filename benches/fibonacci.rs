@@ -35,9 +35,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runner = Runner::default().config(ScenarioConfig::default().branch_sim(true));
     let benches = [
         Scenario::new(run_bench)
-            .with_config(ScenarioConfig::default().filters(["*fibonacci_quick*"])),
+            .config(ScenarioConfig::default().filters(["*fibonacci_quick*"])),
         Scenario::new(run_slow_bench)
-            .with_config(ScenarioConfig::default().filters(["*fibonacci_slow*"])),
+            .config(ScenarioConfig::default().filters(["*fibonacci_slow*"])),
     ];
     runner.run(&benches).unwrap();
     Ok(())

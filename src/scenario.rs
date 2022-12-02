@@ -58,7 +58,7 @@ impl Runner {
                 return Ok(vec![]);
             }
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
-                let outputs = spawn_callgrind(&settings)?;
+                let outputs = spawn_callgrind(&settings, &self.defaults)?;
                 assert_eq!(outputs.len(), settings.len());
                 let ret = outputs.into_iter().enumerate().zip(settings).map(|((run_idx, output_path), run)| Report {run, run_idx, results: output_path}).collect();
                 return Ok(ret);
