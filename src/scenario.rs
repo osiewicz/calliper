@@ -1,7 +1,7 @@
 use crate::callgrind::{spawn_callgrind, CallgrindResultFilename};
-use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::error::CalliperError;
 use crate::instance::ScenarioConfig;
+use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::utils;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -9,6 +9,12 @@ pub struct Report<'a> {
     run: &'a Scenario,
     run_idx: usize,
     results: CallgrindResultFilename,
+}
+
+impl Report<'_> {
+    pub fn into_raw(self) -> std::io::Result<String> {
+        std::fs::read_to_string(&self.results.path)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -60,7 +66,16 @@ impl Runner {
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
                 let outputs = spawn_callgrind(&settings, &self.defaults)?;
                 assert_eq!(outputs.len(), settings.len());
-                let ret = outputs.into_iter().enumerate().zip(settings).map(|((run_idx, output_path), run)| Report {run, run_idx, results: output_path}).collect();
+                let ret = outputs
+                    .into_iter()
+                    .enumerate()
+                    .zip(settings)
+                    .map(|((run_idx, output_path), run)| Report {
+                        run,
+                        run_idx,
+                        results: output_path,
+                    })
+                    .collect();
                 return Ok(ret);
             }
             Err(e) => return Err(e.into()),

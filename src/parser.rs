@@ -1,10 +1,10 @@
-use std::fs::File;
-use std::io::BufReader;
-use std::io::BufRead;
-use std::path::{Path, PathBuf};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::path::{Path, PathBuf};
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
-pub struct ParsedCallgrindOutput{
+pub struct ParsedCallgrindOutput {
     instruction_reads: u64,
     instruction_l1_misses: u64,
     instruction_cache_misses: u64,
@@ -57,4 +57,3 @@ pub fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
         _ => panic!("Unable to parse cachegrind output file"),
     }
 }
-
