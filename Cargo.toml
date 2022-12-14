@@ -26,3 +26,10 @@ harness = false
 [[bench]]
 name = "array_searching"
 harness = false
+
+[[bench]]
+name = "regex"
+harness = false
+
+[dev-dependencies]
+regex = "1.0"
