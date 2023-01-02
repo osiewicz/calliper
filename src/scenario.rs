@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::callgrind::{spawn_callgrind, CallgrindResultFilename};
 use crate::error::CalliperError;
 use crate::instance::ScenarioConfig;
@@ -12,8 +14,11 @@ pub struct Report<'a> {
 }
 
 impl Report<'_> {
-    pub fn into_raw(self) -> std::io::Result<String> {
+    pub fn raw(&self) -> std::io::Result<String> {
         std::fs::read_to_string(&self.results.path)
+    }
+    pub fn parse(&self) -> ParsedCallgrindOutput {
+        parse_callgrind_output(Path::new(&self.results.path))
     }
 }
 

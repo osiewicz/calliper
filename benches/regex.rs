@@ -41,11 +41,7 @@ fn regex_benchmark_from_different_thread() {
 }
 
 fn main() {
-    let mut runner = Runner::default().config(
-        ScenarioConfig::default()
-            .collect_bus(true)
-            .cleanup_files(false),
-    );
+    let mut runner = Runner::default().config(ScenarioConfig::default().collect_bus(true));
     let benches = [
         Scenario::new(regex_benchmark_match)
             .config(ScenarioConfig::default().filters(["*regex_m*"])),

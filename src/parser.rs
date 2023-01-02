@@ -2,21 +2,35 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct ParsedCallgrindOutput {
-    instruction_reads: u64,
-    instruction_l1_misses: u64,
-    instruction_cache_misses: u64,
-    data_reads: u64,
-    data_l1_read_misses: u64,
-    data_cache_read_misses: u64,
-    data_writes: u64,
-    data_l1_write_misses: u64,
-    data_cache_write_misses: u64,
+    instruction_reads: Option<u64>,
+    instruction_l1_misses: Option<u64>,
+    instruction_cache_misses: Option<u64>,
+    data_reads: Option<u64>,
+    data_l1_read_misses: Option<u64>,
+    data_cache_read_misses: Option<u64>,
+    data_writes: Option<u64>,
+    data_l1_write_misses: Option<u64>,
+    data_cache_write_misses: Option<u64>,
 }
 
-pub fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
+impl core::fmt::Display for ParsedCallgrindOutput {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        macro_rules! print_field {
+            ($field_name:ident) => {
+                if let Some(value) = self.$field_name.as_ref() {
+                    write!(fmt, "{}: {}\n", stringify!($field_name), value)?;
+                }
+            };
+        }
+        print_field!(instruction_reads);
+        Ok(())
+    }
+}
+
+pub(crate) fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
     let mut events_line = None;
     let mut summary_line = None;
 
@@ -43,15 +57,15 @@ pub fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
                 .collect();
 
             ParsedCallgrindOutput {
-                instruction_reads: events["Ir"],
-                instruction_l1_misses: events["I1mr"],
-                instruction_cache_misses: events["ILmr"],
-                data_reads: events["Dr"],
-                data_l1_read_misses: events["D1mr"],
-                data_cache_read_misses: events["DLmr"],
-                data_writes: events["Dw"],
-                data_l1_write_misses: events["D1mw"],
-                data_cache_write_misses: events["DLmw"],
+                instruction_reads: events.get("Ir").copied(),
+                instruction_l1_misses: events.get("I1mr").copied(),
+                instruction_cache_misses: events.get("ILmr").copied(),
+                data_reads: events.get("Dr").copied(),
+                data_l1_read_misses: events.get("D1mr").copied(),
+                data_cache_read_misses: events.get("DLmr").copied(),
+                data_writes: events.get("Dw").copied(),
+                data_l1_write_misses: events.get("D1mw").copied(),
+                data_cache_write_misses: events.get("DLmw").copied(),
             }
         }
         _ => panic!("Unable to parse cachegrind output file"),
