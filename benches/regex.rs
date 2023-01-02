@@ -10,7 +10,6 @@
 use std::thread::scope;
 
 use calliper::prelude::*;
-
 use regex::Regex;
 
 #[inline(never)]
