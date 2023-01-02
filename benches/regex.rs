@@ -51,7 +51,7 @@ fn main() {
     let results = runner.run(&benches).unwrap();
     if is_setup_run() {
         for res in results.into_iter() {
-            println!("{}", res.into_raw().unwrap());
+            println!("{}", res.parse());
         }
     }
 }
