@@ -22,6 +22,7 @@ impl Report<'_> {
     }
 }
 
+#[allow(missing_docs)]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Runner {
     _parallelism: usize,
@@ -38,17 +39,24 @@ impl Default for Runner {
 }
 
 impl Runner {
+    /// Override a default configuration
     pub fn config(mut self, config: ScenarioConfig) -> Self {
         self.defaults = config;
         self
     }
-
+    /// An upper bound of Callgrind instances running at the same time. Since Callgrind does not measure wall time, it is acceptable to
+    /// run different scenarios in parallel.
+    /// Defaults to 1.
     pub fn parallelism(mut self, parallelism: usize) -> Self {
         assert_ne!(parallelism, 0);
         self._parallelism = parallelism;
         self
     }
 
+    /// Depending on whether we're in Calliper or Callgrind context, this function either:
+    /// - respawns self process with modified environment variables to indicate which function
+    ///   should be run under Callgrind (Calliper context), or
+    /// - runs the function under benchmark (Callgrind context).
     pub fn run<'a>(
         &self,
         settings: impl IntoIterator<Item = &'a Scenario>,
@@ -96,12 +104,16 @@ pub struct Scenario {
 }
 
 impl Scenario {
+    /// Create a new scenario to be ran by `Runner`.
+    /// Passed function should be marked with `#[no_mangle]`, as without it
+    /// filters might not behave as expected.
     pub fn new(func: fn()) -> Self {
         Self {
             config: ScenarioConfig::default(),
             func,
         }
     }
+    /// Override current configuration.
     pub fn config(mut self, config: ScenarioConfig) -> Self {
         self.config = config;
         self

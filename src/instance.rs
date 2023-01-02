@@ -11,7 +11,6 @@ pub struct ScenarioConfig {
     pub(crate) branch_sim: Option<bool>,
     pub(crate) is_aslr_enabled: Option<bool>,
     pub(crate) cleanup_files: Option<bool>,
-    pub(crate) parallelism: Option<u64>,
     pub(crate) collect_bus: Option<bool>,
     pub(crate) filters: Option<Vec<String>>,
     pub(crate) output_file: Option<Option<String>>,
@@ -48,6 +47,10 @@ impl ScenarioConfig {
         self.cache = settings.into();
         self
     }
+    /// Sets branch prediction simulation. Mirrors Callgrind's `--branch-sim` option.
+    /// Collected metrics include number of executed conditional branches and related predictor
+    /// misses, executed indirect jumps and related misses of the jump address predictor.
+    /// Defaults to false.
     pub fn branch_sim(mut self, is_enabled: bool) -> Self {
         self.branch_sim = Some(is_enabled);
         self
@@ -67,25 +70,26 @@ impl ScenarioConfig {
         self.cleanup_files = Some(is_enabled);
         self
     }
-    /// An upper bound of Callgrind instances running at the same time. Since Callgrind does not measure wall time, it is acceptable to
-    /// run different scenarios in parallel.
-    /// Defaults to 1.
-    pub fn parallelism(mut self, parallelism: u64) -> Self {
-        self.parallelism = Some(parallelism);
-        self
-    }
+
+    /// Sets bus event collection (counts number of executed atomic instructions).
+    /// Defaults to false.
     pub fn collect_bus(mut self, is_enabled: bool) -> Self {
         self.collect_bus = Some(is_enabled);
         self
     }
+    /// Set filters for a particular scenario.
     pub fn filters(mut self, filters: impl IntoIterator<Item = impl Into<String>>) -> Self {
         self.filters = Some(filters.into_iter().map(|s| s.into()).collect());
         self
     }
+    /// Sets callgrind file output path.
+    /// Defaults to `callgrind.out.{pid}`, where pid is - naturally - not up to us anyhow. If you
+    /// intend to process Callgrind's results further, it is recommended to set the path manually.
     pub fn output(mut self, path: impl Into<String>) -> Self {
         self.output_file = Some(Some(path.into()));
         self
     }
+    /// Returns a path to valgrind.
     pub fn get_valgrind(&self) -> &str {
         if let Some(v) = &self.valgrind_path {
             &v
@@ -93,27 +97,30 @@ impl ScenarioConfig {
             "valgrind"
         }
     }
+    /// Returns true if event bus collection is switched on.
     pub fn get_collect_bus(&self) -> bool {
         self.collect_bus.unwrap_or(false)
     }
-    pub fn get_parallelism(&self) -> u64 {
-        self.parallelism.unwrap_or(1)
-    }
+    /// Returns true if Callgrind file cleanup is switched on.
     pub fn get_cleanup_files(&self) -> bool {
         self.cleanup_files.unwrap_or(true)
     }
+    /// Returns true if Address Space Layout Randomization is switched on.
     pub fn get_aslr(&self) -> bool {
         self.is_aslr_enabled.unwrap_or(false)
     }
+    /// Returns true if branch predictor simulation is switched on.
     pub fn get_branch_sim(&self) -> bool {
         self.branch_sim.unwrap_or(false)
     }
+    /// Returns the path to Callgrind output path if it was set manually by the user beforehand.
     pub fn get_output_file<'a>(&'a self) -> Option<&str> {
         self.output_file
             .as_ref()
             .map(|o| o.as_deref())
             .unwrap_or(None)
     }
+    /// Returns filters for a given scenario.
     pub fn get_filters(&self) -> &[String] {
         self.filters.as_deref().unwrap_or(&[])
     }
@@ -122,7 +129,6 @@ impl ScenarioConfig {
             branch_sim: other.branch_sim.or(self.branch_sim),
             is_aslr_enabled: other.is_aslr_enabled.or(self.is_aslr_enabled),
             cleanup_files: other.cleanup_files.or(self.cleanup_files),
-            parallelism: other.parallelism.or(self.parallelism),
             collect_bus: other.collect_bus.or(self.collect_bus),
             valgrind_path: other.valgrind_path.or(self.valgrind_path),
             cache: other.cache.or(self.cache),
@@ -132,16 +138,26 @@ impl ScenarioConfig {
     }
 }
 
+/// Callgrind allows measuring cache stats. Size, associativity and line size for each cache can be
+/// tweaked at will. If a given cache spec field holds `None` value, then **Callgrind** will use
+/// default values for host CPU.
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
 pub struct CacheOptions {
+    /// L1 data cache. Corresponds to `--I1` Callgrind command-line option.
     pub first_level_data: Option<CacheParameters>,
+    /// L1 data cache. Corresponds to `--D1` Callgrind command-line option.
     pub first_level_code: Option<CacheParameters>,
+    /// L3 shared cache. Corresponds to `--LL` Callgrind command-line option.
     pub last_level: Option<CacheParameters>,
 }
 
+/// Parameters of a single cache.
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct CacheParameters {
+    /// Size of cache in bytes
     pub size: usize,
+    /// Associativity of cache line (for more details, see https://en.algorithmica.org/hpc/cpu-cache/associativity/)
     pub associativity: usize,
+    /// Size of a single cache line
     pub line_size: usize,
 }

@@ -6,6 +6,7 @@ use thiserror::Error;
 
 pub(super) const CALLIPER_RUN_ID: &str = "CALLIPER_RUN_ID";
 
+/// Errors related to parsing run id in subprocesses.
 #[derive(Debug, Error)]
 pub enum RunIdError {
     /// Run ID is not an integer.
