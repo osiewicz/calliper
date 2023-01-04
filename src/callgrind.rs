@@ -33,7 +33,7 @@ fn prepare_command(config: &ScenarioConfig, identifier: String) -> Command {
         command.arg("--cache-sim=yes");
         for (prefix, cache_params) in &[
             ("D1", &cache.first_level_data),
-            ("L1", &cache.first_level_code),
+            ("I1", &cache.first_level_code),
             ("LL", &cache.last_level),
         ] {
             if let Some(params) = &cache_params {
