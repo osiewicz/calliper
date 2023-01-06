@@ -9,7 +9,8 @@
 /// This is by no means a documented behaviour of a Regex crate, thus this benchmark can break at any moment.
 use std::thread::scope;
 
-use calliper::{Runner, Scenario, ScenarioConfig, utils::{black_box, is_setup_run}};
+use calliper::utils::{black_box, is_setup_run};
+use calliper::{Runner, Scenario, ScenarioConfig};
 use regex::Regex;
 
 #[inline(never)]
