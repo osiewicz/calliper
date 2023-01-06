@@ -6,6 +6,7 @@ use crate::instance::ScenarioConfig;
 use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::utils;
 
+/// Results for a given Scenario.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Report<'a> {
     run: &'a Scenario,
@@ -14,9 +15,11 @@ pub struct Report<'a> {
 }
 
 impl Report<'_> {
+    /// Get raw contents of Callgrind output file.
     pub fn raw(&self) -> std::io::Result<String> {
         std::fs::read_to_string(&self.results.path)
     }
+    /// Get parsed contents of Callgrind output file.
     pub fn parse(&self) -> ParsedCallgrindOutput {
         parse_callgrind_output(Path::new(&self.results.path))
     }
