@@ -11,9 +11,9 @@ Calliper is a Callgrind-based benchmarking harness with few-too-many knobs stick
   - [Acknowledgmenets](#acknowledgements)
 
 ## Usage
-To use calliper, you must have [Valgrind](https://valgrind.org/) installed. 
+To use Calliper, you must have [Valgrind](https://valgrind.org/) installed. 
 
-To write your first benchmark with calliper, add the following to your `Cargo.toml`:
+To write your first benchmark with Calliper, add the following to your `Cargo.toml`:
 ```toml
 [dev-dependencies]
 calliper = "0.0.1"

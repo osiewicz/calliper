@@ -3,7 +3,7 @@
 //! This crate provides a library for benchmarking user-defined scenarios using
 //! [Callgrind](https://valgrind.org/docs/manual/cl-manual.html), a call-graph and cache prediction
 //! profiler. It aims to serve both upcoming and present benchmarking gurus.
-//! Whenever possible, terminology/naming of calliper aligns with that of Callgrind (in i.e.
+//! Whenever possible, terminology/naming of Calliper aligns with that of Callgrind (in i.e.
 //! parameter names).
 #![deny(missing_docs)]
 mod callgrind;

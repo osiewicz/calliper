@@ -138,9 +138,16 @@ impl ScenarioConfig {
     }
 }
 
-/// Callgrind allows measuring cache stats. Size, associativity and line size for each cache can be
-/// tweaked at will. If a given cache spec field holds `None` value, then **Callgrind** will use
+/// Cache configuration options of a Callgrind instance.
+///
+/// Callgrind supports cache simulation for level-1 data cache, level-1 code cache and last-level
+/// shared cache. The parameters (size, associativity and line size) of each cache can be
+/// configured independently.
+///
+/// If a given cache spec field holds `None` value, then **Callgrind** will use
 /// default values for host CPU.
+/// Thus it is sound to set cache parameters manually to ensure benchmark result stability across
+/// different machines.
 #[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
 pub struct CacheOptions {
     /// L1 data cache. Corresponds to `--I1` Callgrind command-line option.
@@ -151,12 +158,13 @@ pub struct CacheOptions {
     pub last_level: Option<CacheParameters>,
 }
 
-/// Parameters of a single cache.
+/// Size, associativity and line size options for each
+/// simulated cache level.
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct CacheParameters {
     /// Size of cache in bytes
     pub size: usize,
-    /// Associativity of cache line (for more details, see https://en.algorithmica.org/hpc/cpu-cache/associativity/)
+    /// Associativity of cache line (for more details, see <https://en.algorithmica.org/hpc/cpu-cache/associativity/>)
     pub associativity: usize,
     /// Size of a single cache line
     pub line_size: usize,
