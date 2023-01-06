@@ -16,6 +16,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+          toolchain: nightly
+          components: rustfmt
+
     - name: Format check
       run: cargo +nightly fmt --check
     - name: Clippy
