@@ -22,7 +22,14 @@ impl Report<'_> {
     }
 }
 
-#[allow(missing_docs)]
+/// Calliper benchmark runner.
+///
+/// Runner's responsibile for:
+/// - managing shared and scenario-specific configuration
+/// - spawning Callgrind subprocesses
+/// - reporting results
+///
+/// Runner also executes benchmarks in separate Callgrind processes.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Runner {
     _parallelism: usize,
@@ -44,6 +51,7 @@ impl Runner {
         self.defaults = config;
         self
     }
+    #[doc(hidden)]
     /// An upper bound of Callgrind instances running at the same time. Since Callgrind does not measure wall time, it is acceptable to
     /// run different scenarios in parallel.
     /// Defaults to 1.
