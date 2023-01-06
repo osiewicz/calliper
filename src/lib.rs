@@ -17,5 +17,5 @@ pub mod utils;
 
 pub use error::CalliperError;
 pub use instance::{CacheOptions, CacheParameters, ScenarioConfig};
-pub use scenario::{Runner, Report, Scenario};
 pub use parser::ParsedCallgrindOutput;
+pub use scenario::{Report, Runner, Scenario};

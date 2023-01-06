@@ -1,8 +1,8 @@
+use core::fmt::Write;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use core::fmt::Write;
 
 /// Callgrind execution statistics extracted from Callgrind results file.
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
@@ -29,6 +29,15 @@ impl core::fmt::Display for ParsedCallgrindOutput {
             };
         }
         print_field!(instruction_reads);
+        print_field!(instruction_l1_misses);
+        print_field!(instruction_cache_misses);
+        print_field!(data_reads);
+        print_field!(data_l1_read_misses);
+        print_field!(data_cache_read_misses);
+        print_field!(data_writes);
+        print_field!(data_l1_write_misses);
+        print_field!(data_cache_write_misses);
+
         let out = out.trim_end();
         write!(fmt, "{}", out)?;
         Ok(())
