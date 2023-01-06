@@ -33,7 +33,7 @@ impl Report<'_> {
 /// - reporting results
 ///
 /// Runner also executes benchmarks in separate Callgrind processes.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Runner {
     _parallelism: usize,
     defaults: ScenarioConfig,
@@ -85,7 +85,7 @@ impl Runner {
                     })
                     .map(|bench| (bench.func)())?;
                 // Return value doesn't matter here anyways, as it's not checked anywhere under callgrind.
-                return Ok(vec![]);
+                Ok(vec![])
             }
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
                 let outputs = spawn_callgrind(&settings, &self.defaults)?;
@@ -100,9 +100,9 @@ impl Runner {
                         results: output_path,
                     })
                     .collect();
-                return Ok(ret);
+                Ok(ret)
             }
-            Err(e) => return Err(e.into()),
+            Err(e) => Err(e.into()),
         }
     }
 }

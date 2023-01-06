@@ -92,7 +92,7 @@ impl ScenarioConfig {
     /// Returns a path to valgrind.
     pub fn get_valgrind(&self) -> &str {
         if let Some(v) = &self.valgrind_path {
-            &v
+            v
         } else {
             "valgrind"
         }
@@ -114,7 +114,7 @@ impl ScenarioConfig {
         self.branch_sim.unwrap_or(false)
     }
     /// Returns the path to Callgrind output path if it was set manually by the user beforehand.
-    pub fn get_output_file<'a>(&'a self) -> Option<&str> {
+    pub fn get_output_file(&self) -> Option<&str> {
         self.output_file
             .as_ref()
             .map(|o| o.as_deref())
