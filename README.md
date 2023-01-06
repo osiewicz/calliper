@@ -25,30 +25,39 @@ harness = false
 
 Then, create a file at `$PROJECT/benches/my_first_calliper_benchmark.rs` with the following contents:
 
-```
-use calliper::{run, Scenario, ScenarioConfig};
+```rust
+use calliper::utils::black_box;
+use calliper::{Runner, Scenario};
 
-fn fibonacci(n: u64) -> u64 {
-    match n {
-        0 => 1,
-        1 => 1,
-        n => fibonacci(n-1) + fibonacci(n-2),
-    }
+#[inline(never)]
+#[no_mangle]
+fn binary_search_impl(haystack: &[u8], needle: u8) -> Result<usize, usize> {
+    haystack.binary_search(&needle)
+}
+fn bench_binary_search() {
+    let range = (0..255).collect::<Vec<_>>();
+    let _ = black_box(binary_search_impl(black_box(&range), black_box(253)));
 }
 
-fn short_benchmark() -> u64 {
-    fibonacci(black_box(10))
+#[inline(never)]
+#[no_mangle]
+fn linear_search_impl(haystack: &[u8], needle: u8) -> Option<usize> {
+    haystack.iter().position(|n| *n == needle)
 }
 
-fn long_benchmark() -> u64 {
-    fibonacci(black_box(30))
+fn bench_linear_search() {
+    let range = (0..255).collect::<Vec<_>>();
+    black_box(linear_search_impl(black_box(&range), black_box(253)));
 }
 
-fn main() {
-    let config = ScenarioConfig::default();
-    let benches = [Scenario::new(long_benchmark, config),
-                   Scenario::new(short_benchmark, config)];
-    run(&benches).unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let runner = Runner::default();
+    let benches = [
+        Scenario::new(bench_linear_search),
+        Scenario::new(bench_binary_search),
+    ];
+    runner.run(&benches).unwrap();
+    Ok(())
 }
 ```
 
