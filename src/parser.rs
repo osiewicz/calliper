@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use core::fmt::Write;
+
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
 pub struct ParsedCallgrindOutput {
     instruction_reads: Option<u64>,
@@ -17,14 +19,17 @@ pub struct ParsedCallgrindOutput {
 
 impl core::fmt::Display for ParsedCallgrindOutput {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut out = String::default();
         macro_rules! print_field {
             ($field_name:ident) => {
                 if let Some(value) = self.$field_name.as_ref() {
-                    write!(fmt, "{}: {}\n", stringify!($field_name), value)?;
+                    write!(out, "{}: {}\n", stringify!($field_name), value)?;
                 }
             };
         }
         print_field!(instruction_reads);
+        let out = out.trim_end();
+        write!(fmt, "{}", out)?;
         Ok(())
     }
 }
