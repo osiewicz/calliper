@@ -2,6 +2,7 @@
 use std::env;
 use std::num::ParseIntError;
 
+use backtrace::resolve;
 use thiserror::Error;
 
 pub(super) const CALLIPER_RUN_ID: &str = "CALLIPER_RUN_ID";
@@ -49,3 +50,26 @@ pub fn black_box<T>(dummy: T) -> T {
 }
 #[rustversion::since(1.66)]
 pub use std::hint::black_box;
+
+/// Given a function pointer, this function resolves it's mangled name.
+pub(crate) fn get_raw_function_name(f: fn()) -> String {
+    let addr = f as usize + 1;
+    let mut fn_name = None;
+    resolve(addr as _, |symbol| {
+        fn_name = Some(symbol.name().unwrap().as_str().unwrap().to_string());
+    });
+    fn_name.unwrap()
+}
+
+#[cfg(test)]
+mod tests {
+    mod get_raw_function_name {
+        use crate::utils::get_raw_function_name;
+        #[test]
+        fn is_correctly_detected_for_no_mangle_function() {
+            #[no_mangle]
+            fn foo() {}
+            assert_eq!(get_raw_function_name(foo), "foo");
+        }
+    }
+}

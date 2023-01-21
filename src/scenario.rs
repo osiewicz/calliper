@@ -1,12 +1,10 @@
 use std::path::Path;
 
-use backtrace::resolve;
-
 use crate::callgrind::{spawn_callgrind, CallgrindResultFilename};
 use crate::error::CalliperError;
 use crate::instance::ScenarioConfig;
 use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
-use crate::utils;
+use crate::utils::{self, get_raw_function_name};
 
 /// Results for a given Scenario.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -131,14 +129,4 @@ impl Scenario {
         self.config = config;
         self
     }
-}
-
-/// Given a function pointer, this function resolves it's mangled name.
-fn get_raw_function_name(f: fn()) -> String {
-    let addr = f as usize + 1;
-    let mut fn_name = None;
-    resolve(addr as _, |symbol| {
-        fn_name = Some(symbol.name().unwrap().as_str().unwrap().to_string());
-    });
-    fn_name.unwrap()
 }
