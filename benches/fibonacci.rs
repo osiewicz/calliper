@@ -36,11 +36,7 @@ fn run_slow_bench() {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runner = Runner::default().config(ScenarioConfig::default().branch_sim(true));
-    let benches = [
-        Scenario::new(run_bench),
-        Scenario::new(run_slow_bench)
-           
-    ];
+    let benches = [Scenario::new(run_bench), Scenario::new(run_slow_bench)];
     let results = runner.run(&benches).unwrap();
     if is_setup_run() {
         for res in results.into_iter() {
