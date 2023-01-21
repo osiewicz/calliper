@@ -4,7 +4,9 @@ use super::utils;
 /// Callgrind execution settings.
 ///
 /// `ScenarioConfig` defines scenario-agnostic
-#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
+#[derive(
+    Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, serde::Serialize, serde::Deserialize,
+)]
 pub struct ScenarioConfig {
     pub(crate) valgrind_path: Option<String>,
     pub(crate) cache: Option<CacheOptions>,
@@ -148,7 +150,9 @@ impl ScenarioConfig {
 /// default values for host CPU.
 /// Thus it is sound to set cache parameters manually to ensure benchmark result stability across
 /// different machines.
-#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd)]
+#[derive(
+    Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, serde::Serialize, serde::Deserialize,
+)]
 pub struct CacheOptions {
     /// L1 data cache. Corresponds to `--I1` Callgrind command-line option.
     pub first_level_data: Option<CacheParameters>,
@@ -160,7 +164,7 @@ pub struct CacheOptions {
 
 /// Size, associativity and line size options for each
 /// simulated cache level.
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, serde::Serialize, serde::Deserialize)]
 pub struct CacheParameters {
     /// Size of cache in bytes
     pub size: usize,

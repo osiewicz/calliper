@@ -57,7 +57,9 @@ fn prepare_command(config: &ScenarioConfig, identifier: String) -> Command {
     command
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 pub(crate) struct CallgrindResultFilename {
     pub(crate) path: String,
     pub(crate) should_delete: bool,

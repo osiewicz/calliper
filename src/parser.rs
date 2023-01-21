@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 /// Callgrind execution statistics extracted from Callgrind results file.
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, serde::Serialize, serde::Deserialize)]
 pub struct ParsedCallgrindOutput {
     instruction_reads: Option<u64>,
     instruction_l1_misses: Option<u64>,
