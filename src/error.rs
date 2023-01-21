@@ -3,6 +3,7 @@ use thiserror::Error;
 use crate::utils;
 
 /// An error that occured during benchmark harness.
+#[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum CalliperError {
     /// ID of a spawned Calliper subprocess was out-of-bounds. This should not happen under normal
