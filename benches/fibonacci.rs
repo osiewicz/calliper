@@ -24,10 +24,12 @@ fn fibonacci_quick(n: u64) -> u64 {
     current
 }
 
+#[no_mangle]
 fn run_bench() {
     black_box(fibonacci_quick(black_box(20)));
 }
 
+#[no_mangle]
 fn run_slow_bench() {
     black_box(fibonacci_slow(black_box(20)));
 }
@@ -35,9 +37,9 @@ fn run_slow_bench() {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runner = Runner::default().config(ScenarioConfig::default().branch_sim(true));
     let benches = [
-        Scenario::new(run_bench).config(ScenarioConfig::default().filters(["*fibonacci_quick*"])),
+        Scenario::new(run_bench),
         Scenario::new(run_slow_bench)
-            .config(ScenarioConfig::default().filters(["*fibonacci_slow*"])),
+           
     ];
     let results = runner.run(&benches).unwrap();
     if is_setup_run() {

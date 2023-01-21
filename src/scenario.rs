@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use backtrace::resolve;
+
 use crate::callgrind::{spawn_callgrind, CallgrindResultFilename};
 use crate::error::CalliperError;
 use crate::instance::ScenarioConfig;
@@ -120,7 +122,7 @@ impl Scenario {
     /// filters might not behave as expected.
     pub fn new(func: fn()) -> Self {
         Self {
-            config: ScenarioConfig::default(),
+            config: ScenarioConfig::default().filters([get_raw_function_name(func)]),
             func,
         }
     }
@@ -129,4 +131,14 @@ impl Scenario {
         self.config = config;
         self
     }
+}
+
+/// Given a function pointer, this function resolves it's mangled name.
+fn get_raw_function_name(f: fn()) -> String {
+    let addr = f as usize + 1;
+    let mut fn_name = None;
+    resolve(addr as _, |symbol| {
+        fn_name = Some(symbol.name().unwrap().as_str().unwrap().to_string());
+    });
+    fn_name.unwrap()
 }
