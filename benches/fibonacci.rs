@@ -1,4 +1,4 @@
-use calliper::utils::black_box;
+use calliper::utils::{black_box, is_setup_run};
 use calliper::{Runner, Scenario, ScenarioConfig};
 
 #[inline(never)]
@@ -39,6 +39,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Scenario::new(run_slow_bench)
             .config(ScenarioConfig::default().filters(["*fibonacci_slow*"])),
     ];
-    runner.run(&benches).unwrap();
+    let results = runner.run(&benches).unwrap();
+    if is_setup_run() {
+        for res in results.into_iter() {
+            println!("{}", res.parse());
+        }
+    }
     Ok(())
 }
