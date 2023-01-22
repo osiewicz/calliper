@@ -71,7 +71,7 @@ impl Runner {
     pub fn run<'a>(
         &self,
         settings: impl IntoIterator<Item = &'a Scenario>,
-    ) -> Result<Vec<Report<'a>>, CalliperError> {
+    ) -> Result<Option<Vec<Report<'a>>>, CalliperError> {
         let run_id = utils::get_run_id();
         let settings: Vec<&Scenario> = settings.into_iter().collect();
         match run_id {
@@ -85,7 +85,7 @@ impl Runner {
                     })
                     .map(|bench| (bench.func)())?;
                 // Return value doesn't matter here anyways, as it's not checked anywhere under callgrind.
-                Ok(vec![])
+                Ok(None)
             }
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
                 let outputs = spawn_callgrind(&settings, &self.defaults)?;
@@ -100,7 +100,7 @@ impl Runner {
                         results: output_path,
                     })
                     .collect();
-                Ok(ret)
+                Ok(Some(ret))
             }
             Err(e) => Err(e.into()),
         }

@@ -1,4 +1,4 @@
-use calliper::utils::{black_box, is_setup_run};
+use calliper::utils::black_box;
 use calliper::{Runner, Scenario, ScenarioConfig};
 
 #[inline(never)]
@@ -37,8 +37,7 @@ fn run_slow_bench() {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runner = Runner::default().config(ScenarioConfig::default().branch_sim(true));
     let benches = [Scenario::new(run_bench), Scenario::new(run_slow_bench)];
-    let results = runner.run(&benches).unwrap();
-    if is_setup_run() {
+    if let Some(results) = runner.run(&benches)? {
         for res in results.into_iter() {
             println!("{}", res.parse());
         }

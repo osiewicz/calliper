@@ -9,7 +9,7 @@
 /// This is by no means a documented behaviour of a Regex crate, thus this benchmark can break at any moment.
 use std::thread::scope;
 
-use calliper::utils::{black_box, is_setup_run};
+use calliper::utils::black_box;
 use calliper::{Runner, Scenario, ScenarioConfig};
 use regex::Regex;
 
@@ -40,7 +40,7 @@ fn regex_benchmark_from_different_thread() {
     black_box(is_match);
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runner = Runner::default().config(ScenarioConfig::default().collect_bus(true));
     let benches = [
         Scenario::new(regex_benchmark_match)
@@ -48,10 +48,10 @@ fn main() {
         Scenario::new(regex_benchmark_from_different_thread)
             .config(ScenarioConfig::default().filters(["*regex_m*"])),
     ];
-    let results = runner.run(&benches).unwrap();
-    if is_setup_run() {
+    if let Some(results) = runner.run(&benches)? {
         for res in results.into_iter() {
             println!("{}", res.parse());
         }
     }
+    Ok(())
 }
