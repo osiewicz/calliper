@@ -6,7 +6,6 @@ Calliper is a Callgrind-based benchmarking harness with few-too-many knobs stick
 - [Table of contents](#table-of-contents)
   - [Usage](#usage)
   - [Examples](#examples)
-  - [Contributing](#contributing)
   - [License](#license)
   - [Acknowledgmenets](#acknowledgements)
 
@@ -64,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Now the benchmark can be executed with `cargo bench`. 
 
 More sophisticated examples can be found in benches folder of this repository.
-
-## Contributing
 
 ## License
 
