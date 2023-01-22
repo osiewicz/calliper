@@ -6,7 +6,7 @@ use crate::instance::ScenarioConfig;
 use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::utils::{self, get_raw_function_name};
 
-/// Results for a given Scenario.
+/// Results for a given [`Scenario`](struct.Scenario.html).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Report<'a> {
     run: &'a Scenario,
