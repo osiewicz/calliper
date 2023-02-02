@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use crate::callgrind::{spawn_callgrind, CallgrindResultFilename};
+use crate::config::ScenarioConfig;
 use crate::error::CalliperError;
-use crate::instance::ScenarioConfig;
 use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::utils::{self, get_raw_function_name};
 

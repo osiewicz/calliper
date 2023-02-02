@@ -45,15 +45,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 */
 #![deny(missing_docs)]
 mod callgrind;
+mod config;
 mod error;
-mod instance;
 mod parser;
 #[deprecated = "Import items from top-level of crate directly"]
 pub mod prelude;
 mod scenario;
 pub mod utils;
 
+pub use config::{CacheOptions, CacheParameters, ScenarioConfig};
 pub use error::CalliperError;
-pub use instance::{CacheOptions, CacheParameters, ScenarioConfig};
 pub use parser::ParsedCallgrindOutput;
 pub use scenario::{Report, Runner, Scenario};

@@ -1,6 +1,6 @@
 use std::process::{Command, Stdio};
 
-use crate::instance::ScenarioConfig;
+use crate::config::ScenarioConfig;
 use crate::scenario::Scenario;
 
 fn format_bool(value: bool) -> &'static str {
