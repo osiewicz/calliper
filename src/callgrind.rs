@@ -1,3 +1,5 @@
+/// Functions for spawning Callgrind subprocesses and mapping Calliper configuration to Callgrind
+/// command line options.
 use std::process::{Command, Stdio};
 
 use crate::config::ScenarioConfig;
