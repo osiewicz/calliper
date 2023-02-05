@@ -9,7 +9,8 @@ pub struct Scenario {
 }
 
 impl Scenario {
-    /// Create a new scenario to be ran by `Runner`.
+    /// Create a new Scenario and set a default filter.
+    ///
     /// Passed function should be marked with `#[no_mangle]`, as without it
     /// filters might not behave as expected.
     pub fn new(func: fn()) -> Self {

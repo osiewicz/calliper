@@ -31,7 +31,8 @@ impl ScenarioConfig {
     /// Configuration of cache simulation.
     /// Callgrind can collect basic metrics on CPU cache usage of your program.
     /// Calliper does not enable that behaviour by default - cache metrics collection
-    /// can be enabled by passing `Some(CacheOptions)` object.
+    /// can be enabled by passing `Some(CacheOptions)` object (which corresponds to passing
+    /// `--cache-sim=yes` to Callgrind).
     /// ```
     /// use calliper::{ScenarioConfig, CacheOptions, CacheParameters};
     ///
@@ -73,13 +74,26 @@ impl ScenarioConfig {
         self
     }
 
-    /// Sets bus event collection (counts number of executed atomic instructions).
+    /// Sets bus event collection (counts number of executed atomic instructions). Corresponds to
+    /// `--collect-bus` Callgrind option.
     /// Defaults to false.
     pub fn collect_bus(mut self, is_enabled: bool) -> Self {
         self.collect_bus = Some(is_enabled);
         self
     }
-    /// Set filters for a particular scenario.
+    /// Set filters for a particular scenario. Corresponds to `--toggle-collect`.
+    /// Excerpt from Callgrind documentation:
+    /// "Further, you can limit event collection to a specific function by using
+    /// --toggle-collect=function. This will toggle the collection state on entering and leaving
+    /// the specified function.
+    /// ...
+    /// Only events happening while running inside of the given function
+    /// will be collected. Recursive calls of the given function do not trigger any action. This
+    /// option can be given multiple times to specify different functions of interest."
+    ///
+    /// Defaults to name of benchmarked function. Filtering can be disabled by passing in an empty
+    /// vector, though be aware that then whole program will be under benchmark - including
+    /// Calliper code. This is most likely not what you want.
     pub fn filters(mut self, filters: impl IntoIterator<Item = impl Into<String>>) -> Self {
         self.filters = Some(filters.into_iter().map(|s| s.into()).collect());
         self
