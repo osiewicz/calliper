@@ -51,7 +51,7 @@ pub fn black_box<T>(dummy: T) -> T {
 #[rustversion::since(1.66)]
 pub use std::hint::black_box;
 
-/// Given a function pointer, this function resolves it's mangled name.
+/// Given a function pointer, resolve it's mangled name.
 pub(crate) fn get_raw_function_name(f: fn()) -> String {
     let addr = f as usize + 1;
     let mut fn_name = None;

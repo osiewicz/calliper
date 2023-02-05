@@ -49,6 +49,15 @@ impl Default for Runner {
 
 impl Runner {
     /// Override a default configuration
+    ///
+    /// Each Calliper option can be set at three layers:
+    /// - per-scenario configuration
+    /// - a runner configuration
+    /// - library defaults
+    ///
+    /// Scenario configuration has the highest priority, followed by runner configuration and then
+    /// library defaults. Runner configuration is useful to define common set of options such as
+    /// e.g. cache parameters.
     pub fn config(mut self, config: ScenarioConfig) -> Self {
         self.defaults = config;
         self
@@ -66,7 +75,9 @@ impl Runner {
     /// Depending on whether we're in Calliper or Callgrind context, this function either:
     /// - respawns self process with modified environment variables to indicate which function
     ///   should be run under Callgrind (Calliper context), or
-    /// - runs the function under benchmark (Callgrind context).
+    /// - runs the function under benchmark (Callgrind context) based on value set in #1.
+    /// In short, Calliper works by respawning self process under Callgrind and indicating which
+    /// function should be ran under Callgrind via environment variable.
     pub fn run<'a>(
         &self,
         settings: impl IntoIterator<Item = &'a Scenario>,
@@ -83,7 +94,6 @@ impl Runner {
                         limit: settings.len(),
                     })
                     .map(|bench| (bench.func)())?;
-                // Return value doesn't matter here anyways, as it's not checked anywhere under callgrind.
                 Ok(None)
             }
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {
