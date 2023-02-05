@@ -82,6 +82,9 @@ pub(crate) fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
                 data_cache_write_misses: events.get("DLmw").copied(),
             }
         }
-        _ => panic!("Unable to parse cachegrind output file '{}' - missing events/summary line", file.display()),
+        _ => panic!(
+            "Unable to parse cachegrind output file '{}' - missing events/summary line",
+            file.display()
+        ),
     }
 }

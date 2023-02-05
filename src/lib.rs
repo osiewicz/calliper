@@ -48,10 +48,12 @@ mod callgrind;
 mod config;
 mod error;
 mod parser;
+mod runner;
 mod scenario;
 pub mod utils;
 
 pub use config::{CacheOptions, CacheParameters, ScenarioConfig};
 pub use error::CalliperError;
 pub use parser::ParsedCallgrindOutput;
-pub use scenario::{Report, Runner, Scenario};
+pub use runner::{Report, Runner};
+pub use scenario::Scenario;
