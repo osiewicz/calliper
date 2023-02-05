@@ -58,7 +58,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Scenario::new(bench_linear_search),
         Scenario::new(bench_binary_search),
     ];
-    runner.run(&benches).unwrap();
+    if let Some(results) = runner.run(&benches)? {
+        for res in results.into_iter() {
+            println!("{}", res.parse());
+        }
+    }
     Ok(())
 }
 ```
