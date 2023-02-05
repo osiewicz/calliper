@@ -1,6 +1,7 @@
 <h1 align="center">Calliper</h1>
 Calliper is a Callgrind-based benchmarking harness with few-too-many knobs sticking out.
 
+**State**: There's still a lot to do, but Calliper should be usable now. Note that I plan to break API prior to 1.0.0 arbitrarily in minor versions.
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
