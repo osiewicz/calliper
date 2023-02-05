@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Calliper basically respawns self process with modified environment variable that is used by [Runner] to determine which function to run (while already running under Callgrind). 
+Calliper basically respawns self process with modified environment variable that is used by [Runner] to determine which function to run (while already running under Callgrind).
 */
 #![deny(missing_docs)]
 mod callgrind;
