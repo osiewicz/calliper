@@ -48,8 +48,6 @@ mod callgrind;
 mod config;
 mod error;
 mod parser;
-#[deprecated = "Import items from top-level of crate directly"]
-pub mod prelude;
 mod scenario;
 pub mod utils;
 
