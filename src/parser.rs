@@ -18,6 +18,37 @@ pub struct ParsedCallgrindOutput {
     data_cache_write_misses: Option<u64>,
 }
 
+impl ParsedCallgrindOutput {
+    /// Estimates count of RAM hits. It does not account for presence of L2 cache, so the results
+    /// are just an approximation.
+    pub fn ram_accesses(&self) -> Option<u64> {
+        match (
+            self.instruction_cache_misses,
+            self.data_cache_read_misses,
+            self.data_cache_write_misses,
+        ) {
+            (Some(instructions), Some(data_cache_read), Some(data_cache_write)) => {
+                Some(instructions + data_cache_read + data_cache_write)
+            }
+            _ => None,
+        }
+    }
+    /// Estimates cycles based on Itamar Turner-Trauring's formula from https://pythonspeed.com/articles/consistent-benchmarking-in-ci/ and iai implementation.
+    ///
+    /// Returns `None` if necessary data (cache hit count) is not available.
+    pub fn cycles(&self) -> Option<u64> {
+        let ram_hits = self.ram_accesses()?;
+        let l3_accesses =
+            self.instruction_l1_misses? + self.data_l1_read_misses? + self.data_l1_write_misses?;
+        let l3_hits = l3_accesses - ram_hits;
+
+        let memory_rw = self.instruction_reads? + self.data_reads? + self.data_writes?;
+        let l1_hits = memory_rw - ram_hits - l3_hits;
+
+        Some(l1_hits + 5 * l3_hits + 35 * ram_hits)
+    }
+}
+
 impl core::fmt::Display for ParsedCallgrindOutput {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut out = String::default();
@@ -37,6 +68,9 @@ impl core::fmt::Display for ParsedCallgrindOutput {
         print_field!(data_writes);
         print_field!(data_l1_write_misses);
         print_field!(data_cache_write_misses);
+        if let Some(cycles) = self.cycles() {
+            write!(out, "cycles: {}\n", cycles)?;
+        }
 
         let out = out.trim_end();
         write!(fmt, "{}", out)?;
