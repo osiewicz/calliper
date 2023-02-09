@@ -55,7 +55,7 @@ impl core::fmt::Display for ParsedCallgrindOutput {
         macro_rules! print_field {
             ($field_name:ident) => {
                 if let Some(value) = self.$field_name.as_ref() {
-                    write!(out, "{}: {}\n", stringify!($field_name), value)?;
+                    writeln!(out, "{}: {}", stringify!($field_name), value)?;
                 }
             };
         }
@@ -69,7 +69,7 @@ impl core::fmt::Display for ParsedCallgrindOutput {
         print_field!(data_l1_write_misses);
         print_field!(data_cache_write_misses);
         if let Some(cycles) = self.cycles() {
-            write!(out, "cycles: {}\n", cycles)?;
+            writeln!(out, "cycles: {}", cycles)?;
         }
 
         let out = out.trim_end();
