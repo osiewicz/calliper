@@ -50,6 +50,7 @@ mod callgrind;
 mod config;
 mod error;
 mod parser;
+pub mod request;
 mod runner;
 mod scenario;
 pub mod utils;
