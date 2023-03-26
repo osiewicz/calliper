@@ -3,14 +3,21 @@ use crabgrind::callgrind;
 
 /// Valgrind client request.
 #[non_exhaustive]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ClientRequest {
+    /// Dump statistics, zeroing them afterwards.
+    DumpStats {
+        /// If specified, the reason for a dump is stored within the profile file.
+        reason: Option<String>,
+    },
     /// Toggle collection on and off.
     ToggleCollection,
     /// Start instrumentation.
     StartInstrumentation,
     /// Stop instrumentation.
     StopInstrumentation,
+    /// Clear costs.
+    ZeroStats,
 }
 
 impl ClientRequest {
@@ -21,9 +28,13 @@ impl ClientRequest {
     #[inline(always)]
     pub fn now(self) {
         match self {
+            Self::ZeroStats => callgrind::zero_stats(),
             Self::ToggleCollection => callgrind::toggle_collect(),
             Self::StartInstrumentation => callgrind::start_instrumentation(),
             Self::StopInstrumentation => callgrind::stop_instrumentation(),
+            Self::DumpStats { reason } => {
+                callgrind::dump_stats(reason.as_ref().map(|s| s.as_ref()))
+            }
         }
     }
 }
