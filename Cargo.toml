@@ -20,6 +20,7 @@ thiserror = "~1.0"
 rustversion = "1.0"
 backtrace = "0.3"
 serde = {version = "1.0", features = ["derive"]}
+crabgrind = "0.1"
 
 [[bench]]
 name = "fibonacci"
