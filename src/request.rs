@@ -1,7 +1,7 @@
 //! Callgrind requests module for fine-grained control over Callgrind behavior.
 use crabgrind::callgrind;
 
-/// Valgrind client request.
+/// Callgrind client request.
 #[non_exhaustive]
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum ClientRequest {
