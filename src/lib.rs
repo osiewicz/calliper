@@ -58,6 +58,6 @@ pub mod utils;
 pub use config::{CacheOptions, CacheParameters, ScenarioConfig};
 pub use error::CalliperError;
 pub use parser::ParsedCallgrindOutput;
+pub use request::ClientRequest;
 pub use runner::{Report, Runner};
 pub use scenario::Scenario;
-pub use request::ClientRequest;
