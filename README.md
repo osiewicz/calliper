@@ -18,7 +18,7 @@ To use Calliper, you must have [Valgrind](https://valgrind.org/) installed.
 To write your first benchmark with Calliper, add the following to your `Cargo.toml`:
 ```toml
 [dev-dependencies]
-calliper = "0.1.3"
+calliper = "0.1.4"
 
 [[bench]]
 name = "my_first_calliper_benchmark"
