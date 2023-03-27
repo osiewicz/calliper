@@ -6,7 +6,8 @@ use std::path::Path;
 
 /// Callgrind execution statistics extracted from Callgrind results file (callgrind.*.out).
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, serde::Serialize, serde::Deserialize)]
-pub struct ParsedCallgrindOutput {
+pub struct ParsedCallgrindOutput<'name> {
+    name: &'name str,
     instruction_reads: Option<u64>,
     instruction_l1_misses: Option<u64>,
     instruction_cache_misses: Option<u64>,
@@ -18,7 +19,7 @@ pub struct ParsedCallgrindOutput {
     data_cache_write_misses: Option<u64>,
 }
 
-impl ParsedCallgrindOutput {
+impl ParsedCallgrindOutput<'_> {
     /// Estimates count of RAM hits. It does not account for presence of L2 cache, so the results
     /// are just an approximation.
     pub fn ram_accesses(&self) -> Option<u64> {
@@ -49,16 +50,17 @@ impl ParsedCallgrindOutput {
     }
 }
 
-impl core::fmt::Display for ParsedCallgrindOutput {
+impl core::fmt::Display for ParsedCallgrindOutput<'_> {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut out = String::default();
         macro_rules! print_field {
             ($field_name:ident) => {
                 if let Some(value) = self.$field_name.as_ref() {
-                    writeln!(out, "{}: {}", stringify!($field_name), value)?;
+                    writeln!(out, "    {}: {}", stringify!($field_name), value)?;
                 }
             };
         }
+        writeln!(out, "{}", &self.name)?;
         print_field!(instruction_reads);
         print_field!(instruction_l1_misses);
         print_field!(instruction_cache_misses);
@@ -78,7 +80,10 @@ impl core::fmt::Display for ParsedCallgrindOutput {
     }
 }
 
-pub(crate) fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
+pub(crate) fn parse_callgrind_output<'name>(
+    file: &Path,
+    name: &'name str,
+) -> ParsedCallgrindOutput<'name> {
     let mut events_line = None;
     let mut summary_line = None;
 
@@ -105,6 +110,7 @@ pub(crate) fn parse_callgrind_output(file: &Path) -> ParsedCallgrindOutput {
                 .collect();
 
             ParsedCallgrindOutput {
+                name,
                 instruction_reads: events.get("Ir").copied(),
                 instruction_l1_misses: events.get("I1mr").copied(),
                 instruction_cache_misses: events.get("ILmr").copied(),

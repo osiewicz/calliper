@@ -20,7 +20,7 @@ impl Report<'_> {
     }
     /// Get parsed contents of Callgrind output file.
     pub fn parse(&self) -> ParsedCallgrindOutput {
-        parse_callgrind_output(Path::new(&self.results.path))
+        parse_callgrind_output(Path::new(&self.results.path), &self.run.name)
     }
 }
 
