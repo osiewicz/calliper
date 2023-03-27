@@ -6,8 +6,8 @@ use std::path::Path;
 
 /// Callgrind execution statistics extracted from Callgrind results file (callgrind.*.out).
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, serde::Serialize, serde::Deserialize)]
-pub struct ParsedCallgrindOutput<'name> {
-    name: &'name str,
+pub struct ParsedCallgrindOutput {
+    name: String,
     instruction_reads: Option<u64>,
     instruction_l1_misses: Option<u64>,
     instruction_cache_misses: Option<u64>,
@@ -19,7 +19,7 @@ pub struct ParsedCallgrindOutput<'name> {
     data_cache_write_misses: Option<u64>,
 }
 
-impl ParsedCallgrindOutput<'_> {
+impl ParsedCallgrindOutput {
     /// Estimates count of RAM hits. It does not account for presence of L2 cache, so the results
     /// are just an approximation.
     pub fn ram_accesses(&self) -> Option<u64> {
@@ -50,7 +50,7 @@ impl ParsedCallgrindOutput<'_> {
     }
 }
 
-impl core::fmt::Display for ParsedCallgrindOutput<'_> {
+impl core::fmt::Display for ParsedCallgrindOutput {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut out = String::default();
         macro_rules! print_field {
@@ -80,10 +80,10 @@ impl core::fmt::Display for ParsedCallgrindOutput<'_> {
     }
 }
 
-pub(crate) fn parse_callgrind_output<'name>(
+pub(crate) fn parse_callgrind_output(
     file: &Path,
-    name: &'name str,
-) -> ParsedCallgrindOutput<'name> {
+    name: impl Into<String>,
+) -> ParsedCallgrindOutput {
     let mut events_line = None;
     let mut summary_line = None;
 
@@ -108,7 +108,7 @@ pub(crate) fn parse_callgrind_output<'name>(
                         .expect("Unable to parse summary line from cachegrind output file")
                 }))
                 .collect();
-
+            let name = name.into();
             ParsedCallgrindOutput {
                 name,
                 instruction_reads: events.get("Ir").copied(),
