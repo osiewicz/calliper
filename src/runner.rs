@@ -6,11 +6,17 @@ use crate::error::CalliperError;
 use crate::parser::{parse_callgrind_output, ParsedCallgrindOutput};
 use crate::{utils, Scenario};
 /// Results for a given [`Scenario`](struct.Scenario.html).
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Report<'a> {
     run: &'a Scenario,
     run_idx: usize,
     results: CallgrindResultFilename,
+}
+
+impl<'a> PartialEq for Report<'a> {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.run_idx == rhs.run_idx
+    }
 }
 
 impl Report<'_> {
@@ -93,7 +99,7 @@ impl Runner {
                         value: run_id,
                         limit: settings.len(),
                     })
-                    .map(|bench| (bench.func)())?;
+                    .map(|bench| (bench.func.expect("Call ID must point to a function benchmark. Make sure your test setup is determnistic."))())?;
                 Ok(None)
             }
             Err(utils::RunIdError::EnvironmentVariableError(std::env::VarError::NotPresent)) => {

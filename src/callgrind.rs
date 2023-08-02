@@ -1,9 +1,11 @@
+use std::ffi::OsStr;
 /// Functions for spawning Callgrind subprocesses and mapping Calliper configuration to Callgrind
 /// command line options.
 use std::process::{Command, Stdio};
 
 use crate::config::ScenarioConfig;
 use crate::scenario::Scenario;
+use crate::utils;
 
 fn format_bool(value: bool) -> &'static str {
     if value {
@@ -13,7 +15,11 @@ fn format_bool(value: bool) -> &'static str {
     }
 }
 
-fn prepare_command(config: &ScenarioConfig, identifier: String) -> Command {
+fn prepare_command(
+    measured_command: &Command,
+    config: &ScenarioConfig,
+    identifier: String,
+) -> Command {
     let valgrind = config.get_valgrind();
     let mut command = if config.get_aslr() {
         Command::new(valgrind)
@@ -53,8 +59,17 @@ fn prepare_command(config: &ScenarioConfig, identifier: String) -> Command {
         command.arg(format!("--callgrind-out-file=\"{}\"", out_file));
     }
 
-    command.arg(std::env::current_exe().unwrap());
-    command.env(super::utils::CALLIPER_RUN_ID, identifier);
+    command.arg(measured_command.get_program());
+    command.args(measured_command.get_args());
+
+    let run_id: &OsStr = utils::CALLIPER_RUN_ID.as_ref();
+    if measured_command
+        .get_envs()
+        .find(|(name, value)| name == &run_id && value.filter(|val| val.is_empty()).is_some())
+        .is_some()
+    {
+        command.env(super::utils::CALLIPER_RUN_ID, identifier);
+    }
 
     command
 }
@@ -100,7 +115,7 @@ pub(crate) fn spawn_callgrind(
     let mut ret = vec![];
     for (index, run) in scenarios.iter().enumerate() {
         let config = default.clone().overwrite(run.config.clone());
-        let mut command = prepare_command(&config, index.to_string());
+        let mut command = prepare_command(&run.command, &config, index.to_string());
 
         let child = command.spawn().unwrap();
         let id = child.id();
