@@ -129,13 +129,7 @@ pub(crate) fn spawn_callgrind(
             &run.config.get_output_file(),
             config.get_cleanup_files(),
         );
-        let output = child.wait_with_output().unwrap();
-        assert_eq!(
-            output.status.code(),
-            Some(0),
-            "{}",
-            std::str::from_utf8(&output.stderr).unwrap()
-        );
+        child.wait_with_output()?;
         // This is naturally subject to TOCTOU, but it's better than nothing. We'll recheck later on anyways.
         assert!(std::path::Path::new(&name.path).exists());
         ret.push(name);

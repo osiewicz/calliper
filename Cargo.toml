@@ -35,7 +35,7 @@ name = "regex"
 harness = false
 
 [[bench]]
-name = "echo"
+name = "shell_commands"
 harness = false
 
 [dev-dependencies]
