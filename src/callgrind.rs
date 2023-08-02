@@ -63,12 +63,17 @@ fn prepare_command(
     command.args(measured_command.get_args());
 
     let run_id: &OsStr = utils::CALLIPER_RUN_ID.as_ref();
-    if measured_command
-        .get_envs()
-        .find(|(name, value)| name == &run_id && value.filter(|val| val.is_empty()).is_some())
-        .is_some()
-    {
-        command.env(super::utils::CALLIPER_RUN_ID, identifier);
+    for (name, maybe_value) in measured_command.get_envs() {
+        if let Some(value) = maybe_value {
+            let value = if name == run_id && value.is_empty() {
+                identifier.as_ref()
+            } else {
+                value
+            };
+            command.env(name, value);
+        } else {
+            command.env_remove(name);
+        }
     }
 
     command
