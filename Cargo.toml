@@ -34,5 +34,9 @@ harness = false
 name = "regex"
 harness = false
 
+[[bench]]
+name = "echo"
+harness = false
+
 [dev-dependencies]
 regex = "1.0"
